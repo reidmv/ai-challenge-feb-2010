@@ -6,11 +6,7 @@
 #include "map.h"
 #include "loc.h"
 #include "bot.h"
-#include "astar.h"
-#include "floodfill.h"
-#include <cstdlib>
 #include <cstdio>
-#include <list>
 
 /*==========================================================================*/
 /*                           Function Prototypes                            */
