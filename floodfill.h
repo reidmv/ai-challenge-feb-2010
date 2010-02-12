@@ -17,7 +17,7 @@ namespace AI {
 	/*======================================================================*/
 	/*       Class: Floodfill                                               */
 	/* Description: When given starting coordinates, calculates the longest */
-	/*              path.                                                   */
+	/*              possible path.                                          */
 	/*======================================================================*/
 	class Floodfill
 	{

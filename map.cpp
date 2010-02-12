@@ -9,6 +9,8 @@
 #include <cstdlib>
 #include <string>
 
+using namespace std;
+
 /*==========================================================================*/
 /* Default Constructor                                                      */
 /*==========================================================================*/
@@ -299,4 +301,38 @@ void Map::ReadFromFile(FILE *file_handle) {
 	opponent.setRow(player_two_x);
 	opponent.setCol(player_two_y);
 
+}
+
+/*==========================================================================*/
+/*    Function: getAdjacencies                                              */
+/* Description: Returns a list of locations adjacent to the given loc. Does */
+/*              not return walls or entities.                               */
+/*==========================================================================*/
+list<Loc> Map::getAdjacencies(Loc &loc)
+{
+	Loc       adjacency;
+	list<Loc> adjacencies;
+
+	int rowStart = max(loc.getRow() - 1, 0);
+	int colStart = max(loc.getCol() - 1, 0);
+	int rowStop  = min(loc.getRow() + 1, rows);
+	int colStop  = min(loc.getCol() + 1, cols);
+	bool diag = (loc.getRow() % 2) - (loc.getCol() % 2);
+
+	for (int i = rowStart; i <= rowStop; ++i) {
+		for (int j = colStart; j <= colStop; ++j) {
+
+			// skip diagonals
+			if (static_cast<bool>((i % 2) - (j % 2)) == diag) {
+				continue;
+			}
+
+			// note the new location, and add it to the list of adjacencies
+			adjacency.setRow(i);
+			adjacency.setCol(j);
+			adjacencies.push_back(adjacency);
+		}
+	}
+
+	return adjacencies;
 }

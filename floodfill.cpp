@@ -7,8 +7,8 @@
 #include "floodfill.h"
 #include <cmath>
 #include <cstdlib>
-#include <cstdio>
 #include <list>
+#include <iostream>
 
 using namespace AI;
 using namespace std;
@@ -90,31 +90,17 @@ list<Loc> Floodfill::search(Loc &start, Map &map, int margin)
 /*==========================================================================*/
 list<Loc> Floodfill::getAdjacencies(Loc &loc, Map &map)
 {
-	Loc       adjacency;
-	list<Loc> adjacencies;
+	list<Loc>::iterator erase_me;
+	list<Loc> adjacencies = map.getAdjacencies(loc);
+	list<Loc>::iterator i = adjacencies.begin();
 
-	int rowStart = max(loc.getRow() - 1, 0);
-	int colStart = max(loc.getCol() - 1, 0);
-	int rowStop  = min(loc.getRow() + 1, map.getRows());
-	int colStop  = min(loc.getCol() + 1, map.getCols());
-	bool diag = (loc.getRow() % 2) - (loc.getCol() % 2);
-
-	adjacencies.clear();
-
-	for (int i = rowStart; i <= rowStop; ++i) {
-		for (int j = colStart; j <= colStop; ++j) {
-
-			// skip diagonals
-			if (static_cast<bool>((i % 2) - (j % 2)) == diag) {
-				continue;
-			}
-
-			// note the new location, and add it to result
-			adjacency.setRow(i);
-			adjacency.setCol(j);
-			if (map.getVal(i, j) == Map::FLOOR && !inPath(adjacency)) {
-				adjacencies.push_back(adjacency);
-			}
+	while (i != adjacencies.end()) {
+		if (map.getVal(*i) != Map::FLOOR || inPath(*i)) {
+			erase_me = i;
+			i++;
+			adjacencies.erase(erase_me);
+		} else {
+			i++;
 		}
 	}
 

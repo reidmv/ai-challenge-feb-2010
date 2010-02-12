@@ -7,6 +7,7 @@
 #define MAP_H
 
 #include "loc.h"
+#include <list>
 #include <cstdio>
 
 /*==========================================================================*/
@@ -30,12 +31,13 @@ class Map
 		Loc  getPlayer(void);
 		Loc  getOpponent(void);
 		int  getFreespace(void) const;
+		std::list<Loc> getAdjacencies(Loc &loc);
 
 		void makeMove(int move, FILE *file_handle);
 		void makeMove(Loc &move, FILE *file_handle);
 		void ReadFromFile(FILE *file_handle);
 
-		enum Val { FLOOR, WALL, ENTITY };
+		enum Val { FLOOR, WALL, ENTITY, DANGER };
 
 	private:
 		int **map;
