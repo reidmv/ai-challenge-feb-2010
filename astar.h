@@ -44,7 +44,7 @@ namespace AI {
 			AStarNode* leastCost(std::list<AStarNode> &open_list);
 			int  costFrom(AStarNode &loc);
 			void addAdjacent(AStarNode &curr);
-			bool inClosed(AStarNode &curr);
+			bool inClosed(Loc &curr);
 			bool inOpen(AStarNode &curr);
 	};
 }

@@ -153,30 +153,28 @@ int AStar::costFrom(AStarNode &curr)
 /* Description: Adds locations adjacent to the given loc to the given       */
 /*              open_list                                                   */
 /*==========================================================================*/
-void AStar::addAdjacent(AStarNode &curr)
+void AStar::addAdjacent(AStarNode &loc)
 {
 	AStarNode new_node;
-	int rowStart = max(curr.getRow() - 1, 0);
-	int colStart = max(curr.getCol() - 1, 0);
-	int rowStop  = min(curr.getRow() + 1, map->getRows());
-	int colStop  = min(curr.getCol() + 1, map->getCols());
-	bool diag = (curr.getRow() % 2) - (curr.getCol() % 2);
+	list<Loc>::iterator erase_me;
+	list<Loc> adjacencies = map->getAdjacencies(loc);
+	list<Loc>::iterator i = adjacencies.begin();
 
-	for (int i = rowStart; i <= rowStop; ++i) {
-		for (int j = colStart; j <= colStop; ++j) {
-
-			// skip diagonals
-			if (static_cast<bool>((i % 2) - (j % 2)) == diag) {
-				continue;
-			}
-
-			// note the new location, and add it to open_list if not in closed
-			new_node.set(i, j, &curr);
-			if ( !inClosed(new_node) && 
-			     (map->getVal(new_node) != Map::WALL) ) {
-				openList.push_back(new_node);
-			}
+	// remove closed nodes and WALL nodes
+	while (i != adjacencies.end()) {
+		if (map->getVal(*i) == Map::WALL || inClosed(*i)) {
+			erase_me = i;
+			i++;
+			adjacencies.erase(erase_me);
+		} else {
+			i++;
 		}
+	}
+
+	// add remaining adjacencies to openList
+	for (i = adjacencies.begin(); i != adjacencies.end(); i++) {
+		new_node.set(*i, &loc);
+		openList.push_back(new_node);
 	}
 
 	return;
@@ -186,7 +184,7 @@ void AStar::addAdjacent(AStarNode &curr)
 /*    Function: inClosed                                                    */
 /* Description: Returns true if the given loc is already in the closed list */
 /*==========================================================================*/
-bool AStar::inClosed(AStarNode &curr)
+bool AStar::inClosed(Loc &curr)
 {
 	list<Loc>::iterator i;
 
