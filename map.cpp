@@ -1,0 +1,302 @@
+// Google AI Contest
+// Reid Vandewiele
+// -marut-
+// February 9, 2010
+
+#include "map.h"
+#include "loc.h"
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
+/*==========================================================================*/
+/* Default Constructor                                                      */
+/*==========================================================================*/
+Map::Map(void)
+{
+	rows      = -1;
+	cols      = -1;
+	map       =  0;
+	freespace = 0;
+}
+
+/*==========================================================================*/
+/* An actually useful constructor                                           */
+/*==========================================================================*/
+Map::Map(int newrows, int newcols)
+{
+	rows      = -1;
+	cols      = -1;
+	map       =  0;
+	freespace =  0;
+	setMapSize(newrows, newcols);
+
+	return;
+}
+
+/*==========================================================================*/
+/* Destructor                                                               */
+/*==========================================================================*/
+Map::~Map(void)
+{
+	if (map) {
+		for (int i = 0; i < rows; ++i) {
+		    delete [] map[i];
+		}
+		delete [] map;
+	}
+
+	map = 0;
+}
+
+/*==========================================================================*/
+/*    Function: setMapSize                                                  */
+/* Description: Sets up the map at a specified size                         */
+/*==========================================================================*/
+void Map::setMapSize(int newrows, int newcols) 
+{
+	// Ensure sane sizes have been given
+	if (newrows <= 0 || newcols <= 0) {
+		return;
+	}
+
+	// Deallocate map if necessary
+	if (map) {
+		for (int i = 0; i < rows; ++i) {
+		    delete [] map[i];
+		}
+		delete [] map;
+	}
+
+	rows = newrows;
+	cols = newcols;
+
+	// Allocate map
+	map = new int*[rows];
+	for (int i = 0; i < rows; ++i) {
+		map[i] = new int[cols];
+	}
+
+	// Initialize map to all FLOOR
+	for (int i = 0; i < rows; ++i) {
+		for (int j = 0; j < cols; ++j) {
+			map[i][j] = FLOOR;
+		}
+	}
+	return;
+}
+
+/*==========================================================================*/
+/*    Function: getRows                                                     */
+/* Description: Returns the number of rows in the Map.                      */
+/*==========================================================================*/
+int Map::getRows()
+{
+	return rows;
+}
+
+/*==========================================================================*/
+/*    Function: getCols                                                     */
+/* Description: Returns the number of cols in the Map.                      */
+/*==========================================================================*/
+int Map::getCols()
+{
+	return cols;
+}
+
+/*==========================================================================*/
+/*    Function: getVal()                                                    */
+/* Description: Returns the map value for a specified row and col.          */
+/*==========================================================================*/
+int Map::getVal(int getrow, int getcol) const
+{
+	if (getrow < 0 || getrow >= rows ||
+		getcol < 0 || getcol >= cols) {
+		return -1;
+	}
+
+	return map[getrow][getcol];
+}
+
+/*==========================================================================*/
+/*    Function: getPlayer()                                                 */
+/* Description: Returns the map value for the player                        */
+/*==========================================================================*/
+Loc Map::getPlayer(void)
+{
+	return player;
+}
+
+/*==========================================================================*/
+/*    Function: getOpponent()                                               */
+/* Description: Returns the map value for the opponent                      */
+/*==========================================================================*/
+Loc Map::getOpponent(void)
+{
+	return opponent;
+}
+
+/*==========================================================================*/
+/*    Function: getVal()                                                    */
+/* Description: Returns the map value for a specified location.             */
+/*==========================================================================*/
+int Map::getVal(const Loc &loc) const
+{
+	return getVal(loc.getRow(), loc.getCol());
+}
+
+/*==========================================================================*/
+/*    Function: setVal()                                                    */
+/* Description: Sets the map at a specified coordinates to a given value.   */
+/*==========================================================================*/
+int Map::setVal(int setrow, int setcol, int value) 
+{
+	if (setrow < 0 || setrow >= rows ||
+	    setcol < 0 || setcol >= cols)
+	{
+		return -1;
+	}
+
+	map[setrow][setcol] = value;
+
+	return 0;
+}
+
+/*==========================================================================*/
+/*    Function: setVal()                                                    */
+/* Description: Sets the map at a specified location to a given value.      */
+/*==========================================================================*/
+int Map::setVal(Loc &loc, int value) 
+{
+	return setVal(loc.getRow(), loc.getCol(), value);
+}
+
+/*==========================================================================*/
+/*    Function: getFreespace()                                              */
+/* Description: Returns the number of "free" spaces in the map              */
+/*==========================================================================*/
+int Map::getFreespace(void) const
+{
+	return freespace;
+}
+
+/*==========================================================================*/
+/*    Function: makeMove()                                                  */
+/* Description: Prints a specified move to the specified file               */
+/*==========================================================================*/
+void Map::makeMove(int move, FILE *file_handle) {
+  fprintf(file_handle, "%d\n", move);
+  fflush(file_handle);
+}
+
+/*==========================================================================*/
+/*    Function: makeMove()                                                  */
+/* Description: Prints a specified move to the specified file               */
+/*==========================================================================*/
+void Map::makeMove(Loc &move, FILE *file_handle)
+{
+	int intmove;
+
+	if (move.getRow() > player.getRow()) {
+		intmove = 2; // east
+	} else if (move.getRow() < player.getRow()) {
+		intmove = 4; // west
+	} else if (move.getCol() > player.getCol()) {
+		intmove = 3; // south
+	} else {
+		intmove = 1; // north
+	}
+
+	makeMove(intmove, file_handle);
+}
+
+/*==========================================================================*/
+/*    Function: ReadFromFile()                                              */
+/* Description: Reads the map state from a file. Hacked in from example     */
+/*              code cause even though it's ugly, it's not worth redoing.   */
+/*==========================================================================*/
+void Map::ReadFromFile(FILE *file_handle) {
+  int x, y, c;
+	
+	int map_width  = rows;
+	int map_height = cols;
+	int player_one_x;
+	int player_one_y;
+	int player_two_x;
+	int player_two_y;
+	
+	freespace = 0;
+
+  int num_items = fscanf(file_handle, "%d %d\n", &map_width, &map_height);
+  if (feof(file_handle) || num_items < 2) {
+    exit(0); // End of stream means end of game. Just exit.
+  }
+
+	if (map == 0 || map_width != rows || map_height != cols) {
+		setMapSize(map_width, map_height);
+	}
+
+  x = 0;
+  y = 0;
+  while (y < map_height && (c = fgetc(file_handle)) != EOF) {
+    switch (c) {
+    case '\r':
+      break;
+    case '\n':
+      if (x != map_width) {
+	fprintf(stderr, "x != width in Board_ReadFromStream\n");
+	return;
+      }
+      ++y;
+      x = 0;
+      break;
+    case '#':
+      if (x >= map_width) {
+	fprintf(stderr, "x >= width in Board_ReadFromStream\n");
+	return;
+      }
+      map[x][y] = WALL;
+      ++x;
+      break;
+    case ' ':
+      if (x >= map_width) {
+	fprintf(stderr, "x >= width in Board_ReadFromStream\n");
+	return;
+      }
+      map[x][y] = FLOOR;
+      ++freespace;
+      ++x;
+      break;
+    case '1':
+      if (x >= map_width) {
+	fprintf(stderr, "x >= width in Board_ReadFromStream\n");
+	return;
+      }
+      map[x][y] = ENTITY;
+      player_one_x = x;
+      player_one_y = y;
+      ++x;
+      break;
+    case '2':
+      if (x >= map_width) {
+	fprintf(stderr, "x >= width in Board_ReadFromStream\n");
+	return;
+      }
+      map[x][y] = ENTITY;
+      player_two_x = x;
+      player_two_y = y;
+      ++x;
+      break;
+    default:
+      fprintf(stderr, "unexpected character %d in Board_ReadFromStream", c);
+      return;
+    }
+  }
+
+	player.setRow(player_one_x);
+	player.setCol(player_one_y);
+
+	opponent.setRow(player_two_x);
+	opponent.setCol(player_two_y);
+
+}
