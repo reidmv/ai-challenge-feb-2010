@@ -1,0 +1,12 @@
+#!/bin/sh
+
+ENGINE="$HOME/googleai/engine/Tron.jar"
+MAPDIR="$HOME/googleai/maps"
+LOGDIR="$HOME/googleai/input"
+BOTDIR="$HOME/googleai/example_bots"
+MAP="empty-room.txt"
+BOT1="./MyTronBot"
+BOT2="java -jar $BOTDIR/RandomBot.jar"
+#BOT2="./MyTronBot"
+
+java -jar "$ENGINE" "$MAPDIR/$MAP" "$BOT1" "$BOT2" | tee "$LOGDIR/`date +%H%M%S`"
