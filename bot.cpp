@@ -58,11 +58,11 @@ Loc Bot::makeMove(Map &map)
 
 	// if there are no moves in the move list, do SOMETHING
 	if (path.empty()) {
-		path = floodfill.search(player, map, 1);
-	} else {
-		move = path.front();
-		path.pop_front();
-	}
+		simple(player, map);
+	} 
+
+	move = path.front();
+	path.pop_front();
 
 	return move;
 }
@@ -78,12 +78,12 @@ void Bot::charge(Loc &player, Loc &opponent, int oppDist, Map &map)
 		oppDist = path.size();
 	} else {
 		state = FILL;
-		path = floodfill.search(player, map, 100000);
+		path = floodfill.search(player, map, 200000);
 	}
 
 	// break out of state charge conditions
-	if (oppDist < 7) {
-		counter = 3;
+	if (oppDist < AI::CHARGE_STOP) {
+		counter = AI::SKIRT_MOVES;
 		state = SKIRT;
 		path = floodfill.search(player, map);
 	}
@@ -97,12 +97,12 @@ void Bot::charge(Loc &player, Loc &opponent, int oppDist, Map &map)
 void Bot::fill(Loc &player, Loc &opponent, int oppDist, Map &map)
 {
 	// default action
-	if (counter > 0 && !path.empty()) {
-		counter--;
+	if (/*counter > 0 && */ !path.empty()) {
+		//counter--;
 		return;
 	} else {
 		path = floodfill.search(player, map);
-		counter = 5;
+		counter = AI::FILL_MOVES;
 	}
 
 	return;
@@ -121,6 +121,34 @@ void Bot::skirt(Loc &player, Loc &opponent, int oppDist, Map &map)
 	}
 	
 	path = floodfill.search(player, map);
+
+	return;
+}
+
+/*==========================================================================*/
+/* SIMPLE                                                                   */
+/*==========================================================================*/
+void Bot::simple(Loc &player, Map &map)
+{
+	// default action
+	std::list<Loc> adjacencies = map.getAdjacencies(player);
+	std::list<Loc>::iterator i;
+
+	path.clear();
+
+	// look for any possible move
+	for (i = adjacencies.begin(); i != adjacencies.end(); i++) {
+		if (map.getVal(*i) == Map::FLOOR || map.getVal(*i) == Map::DANGER) {
+			path.push_front(*i);
+			break;
+		}
+	}
+
+	// no move? ok. suicide then.
+	if (path.empty()) {
+		i--;
+		path.push_front(*i);
+	}
 
 	return;
 }

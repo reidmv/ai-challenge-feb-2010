@@ -44,6 +44,7 @@ class Map
 		int  rows;
 		int  cols;
 		int  freespace;
+		int  ticker;
 		Loc  player;
 		Loc  opponent;
 

@@ -3,6 +3,7 @@
 // -marut-
 // February 9, 2010
 
+#include "ai.h"
 #include "map.h"
 #include "loc.h"
 #include <cstdio>
@@ -20,6 +21,7 @@ Map::Map(void)
 	cols      = -1;
 	map       =  0;
 	freespace = 0;
+	ticker    = 0;
 }
 
 /*==========================================================================*/
@@ -351,6 +353,18 @@ list<Loc> Map::getAdjacencies(Loc &loc)
 			adjacency.setCol(j);
 			adjacencies.push_back(adjacency);
 		}
+	}
+
+	// if no adjacencies were returned, we're done here
+	if (adjacencies.size() == 0) {
+		return adjacencies;
+	}
+
+	// mix up the order a bit just to make things interesting
+	ticker++;
+	for (int i = ticker % AI::TICKER_MOD; i > 0; i--) {
+		adjacencies.push_back(adjacencies.front());
+		adjacencies.pop_front();
 	}
 
 	return adjacencies;
