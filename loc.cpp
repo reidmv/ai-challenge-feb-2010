@@ -81,3 +81,12 @@ bool Loc::operator==(const Loc &comp) const
 {
 	return (this->row == comp.row && this->col == comp.col);
 }
+
+/*==========================================================================*/
+/*    Function: operator!=                                                  */
+/* Description: Overloads the != operator for comparing to another Loc      */
+/*==========================================================================*/
+bool Loc::operator!=(const Loc &comp) const
+{
+	return (this->row != comp.row || this->col != comp.col);
+}

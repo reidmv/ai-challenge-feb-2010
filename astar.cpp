@@ -145,7 +145,11 @@ AStarNode* AStar::leastCost(list<AStarNode> &open_list)
 /*==========================================================================*/
 int AStar::costFrom(AStarNode &curr)
 {
-	return end->distanceFrom(curr);
+	if (map->getVal(curr) == Map::DANGER) {
+		return end->distanceFrom(curr) + 100;
+	} else {
+		return end->distanceFrom(curr);
+	}
 }
 
 /*==========================================================================*/

@@ -8,7 +8,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <list>
-#include <iostream>
 
 using namespace AI;
 using namespace std;
@@ -35,7 +34,6 @@ list<Loc> Floodfill::search(Loc &start, Map &map, int margin)
 	list<Loc>         result;
 	list< list<Loc> > adjacencyList;
 	list<Loc>         emptyAdjacency; 
-	Loc               loc;          
 
 	// start the timer
 	gettimeofday(&t_beg, NULL);
@@ -43,10 +41,9 @@ list<Loc> Floodfill::search(Loc &start, Map &map, int margin)
 	path.clear();
 	longest_path.clear();
 
-	loc = start;
-	path.push_back(loc);
+	path.push_back(start);
 	adjacencyList.push_front(emptyAdjacency);
-	adjacencyList.front() = getAdjacencies(loc, map);
+	adjacencyList.front() = getAdjacencies(start, map);
 
 	do
 	{
@@ -64,7 +61,6 @@ list<Loc> Floodfill::search(Loc &start, Map &map, int margin)
 			}
 			path.pop_front();
 			adjacencyList.pop_front();
-			loc = path.front();
 		}
 
 		// calculate elapsed time
@@ -93,12 +89,23 @@ list<Loc> Floodfill::getAdjacencies(Loc &loc, Map &map)
 	list<Loc>::iterator erase_me;
 	list<Loc> adjacencies = map.getAdjacencies(loc);
 	list<Loc>::iterator i = adjacencies.begin();
+	int map_val;
 
 	while (i != adjacencies.end()) {
-		if (map.getVal(*i) != Map::FLOOR || inPath(*i)) {
+		map_val = map.getVal(*i);
+		// explore dangerous options last
+		if (map_val == Map::DANGER && adjacencies.back() != *i) {
+			erase_me = i;
+			i++;
+			adjacencies.push_back(*i);
+			adjacencies.erase(erase_me);
+		// don't explore non-floor or space already in path
+		} else if ((map_val != Map::FLOOR && map_val != Map::DANGER) 
+		            || inPath(*i)) {
 			erase_me = i;
 			i++;
 			adjacencies.erase(erase_me);
+		// 
 		} else {
 			i++;
 		}

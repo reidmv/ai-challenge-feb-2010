@@ -301,6 +301,25 @@ void Map::ReadFromFile(FILE *file_handle) {
 	opponent.setRow(player_two_x);
 	opponent.setCol(player_two_y);
 
+	markDanger();
+}
+
+/*==========================================================================*/
+/* markDanger                                                               */
+/*==========================================================================*/
+void Map::markDanger(void)
+{
+	list<Loc> adjacencies = getAdjacencies(opponent);
+	list<Loc>::iterator i = adjacencies.begin();
+
+	// mark squares next to opponent as DANGER
+	for (i = adjacencies.begin(); i != adjacencies.end(); i++) {
+		if (getVal(*i) == FLOOR) {
+			map[i->getRow()][i->getCol()] = DANGER;
+		}
+	}
+
+	return;
 }
 
 /*==========================================================================*/

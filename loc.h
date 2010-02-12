@@ -23,6 +23,7 @@ class Loc
 		int  distanceFrom(const Loc &comp) const;
 
 		bool operator==(const Loc &comp) const;
+		bool operator!=(const Loc &comp) const;
 
 	private:
 		int row;

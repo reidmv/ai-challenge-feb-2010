@@ -40,12 +40,14 @@ class Map
 		enum Val { FLOOR, WALL, ENTITY, DANGER };
 
 	private:
-		int **map;
-		int rows;
-		int cols;
-		int freespace;
-		Loc player;
-		Loc opponent;
+		int  **map;
+		int  rows;
+		int  cols;
+		int  freespace;
+		Loc  player;
+		Loc  opponent;
+
+		void markDanger(void);
 };
 
 #endif
