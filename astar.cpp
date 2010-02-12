@@ -202,22 +202,3 @@ bool AStar::inClosed(Loc &curr)
 
 	return false;
 }
-
-/*==========================================================================*/
-/*    Function: inOpen                                                      */
-/* Description: Returns true if the given loc is already in the open list   */
-/*==========================================================================*/
-bool AStar::inOpen(AStarNode &curr)
-{
-	list<AStarNode>::iterator i;
-
-	//int debug = openList.size();
-
-	for (i = openList.begin(); i != openList.end(); i++) {
-		if (*i == curr) {
-			return true;
-		}
-	}
-
-	return false;
-}

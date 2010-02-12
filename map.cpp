@@ -303,7 +303,7 @@ void Map::ReadFromFile(FILE *file_handle) {
 	opponent.setRow(player_two_x);
 	opponent.setCol(player_two_y);
 
-	markDanger();
+	//markDanger();
 }
 
 /*==========================================================================*/
@@ -355,6 +355,7 @@ list<Loc> Map::getAdjacencies(Loc &loc)
 		}
 	}
 
+	/*
 	// if no adjacencies were returned, we're done here
 	if (adjacencies.size() == 0) {
 		return adjacencies;
@@ -366,6 +367,7 @@ list<Loc> Map::getAdjacencies(Loc &loc)
 		adjacencies.push_back(adjacencies.front());
 		adjacencies.pop_front();
 	}
+	*/
 
 	return adjacencies;
 }

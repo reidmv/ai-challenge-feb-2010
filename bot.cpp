@@ -77,6 +77,7 @@ void Bot::charge(Loc &player, Loc &opponent, int oppDist, Map &map)
 	if (!path.empty()) {
 		oppDist = path.size();
 	} else {
+		counter = AI::FILL_MOVES;
 		state = FILL;
 		path = floodfill.search(player, map, 200000);
 	}
@@ -97,8 +98,8 @@ void Bot::charge(Loc &player, Loc &opponent, int oppDist, Map &map)
 void Bot::fill(Loc &player, Loc &opponent, int oppDist, Map &map)
 {
 	// default action
-	if (/*counter > 0 && */ !path.empty()) {
-		//counter--;
+	if (counter > 0 && !path.empty()) {
+		counter--;
 		return;
 	} else {
 		path = floodfill.search(player, map);

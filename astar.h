@@ -45,7 +45,6 @@ namespace AI {
 			int  costFrom(AStarNode &loc);
 			void addAdjacent(AStarNode &curr);
 			bool inClosed(Loc &curr);
-			bool inOpen(AStarNode &curr);
 	};
 }
 
