@@ -14,9 +14,8 @@ TEMP_DIR='entry'
 rm "./${TEMP_DIR}/"* 2>/dev/null
 
 for file in `ls *.{cpp,h,cc}`; do
-	'./strip-comments.sed' "$file" > "./${TEMP_DIR}/${file}_1"
-	sed '/^[ \t]*$/d' "./${TEMP_DIR}/${file}_1" > "./${TEMP_DIR}/${file}"
-	rm "./${TEMP_DIR}/${file}_1"
+	'./strip-comments' < "$file" > "./${TEMP_DIR}/${file}"
+	sed -i 's/ \+/ /g' "./${TEMP_DIR}/${file}"
 done
 
 zip `date +%Y%m%d%H%M%S`.zip "${TEMP_DIR}/"*
