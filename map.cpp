@@ -190,7 +190,8 @@ void Map::makeMove(int move, FILE *file_handle) {
   fprintf(file_handle, "%d\n", move);
   fflush(file_handle);
 	
-	////////
+	/*
+	/////////
 	// debug
 	
 	switch (move) {
@@ -205,29 +206,9 @@ void Map::makeMove(int move, FILE *file_handle) {
 	}
   fflush(stderr);
 
-
-	/*
-	for (int i = 0; i < rows; ++i) {
-		for (int j = 0; j < cols; ++j) {
-			fprintf(stderr, "%d, ", map[i][j]);
-		}
-		fprintf(stderr, "\n");
-	}
-	fprintf(stderr, "\n");
-	fflush(stderr);
-
-	for (int i = 0; i < rows; ++i) {
-		for (int j = 0; j < cols; ++j) {
-			fprintf(stderr, "%d, ", grid[i][j]);
-		}
-		fprintf(stderr, "\n");
-	}
-	fprintf(stderr, "\n");
-	fflush(stderr);
-	*/
-
 	// debug
-	////////
+	/////////
+	*/
 }
 
 /*==========================================================================*/
@@ -337,7 +318,7 @@ void Map::ReadFromFile(FILE *file_handle) {
 	opponent.setRow(player_two_x);
 	opponent.setCol(player_two_y);
 
-	markDanger();
+	//markDanger();
 }
 
 /*==========================================================================*/

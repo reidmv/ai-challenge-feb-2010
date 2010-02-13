@@ -11,6 +11,7 @@
 #include <list>
 #include <ctime>
 #include <sys/time.h>
+#include <iostream>
 
 using namespace AI;
 
@@ -166,16 +167,15 @@ void Bot::skirt(Map &map)
 
 	// note path to opponent
 	path.clear();
-	path = astar.search(opponent, player, map);
+	path = astar.search(player, opponent, map);
 	
 	if (path.size() == 0) {
+		state = FILL;
 		path = longestpath.search(player, map);
 		return;
 	}
-	
-	// pop off the player location
-	path.pop_back();
 
+	// look for chokepoints
 	for (i = path.begin(); i != path.end(); i++) {
 		if (map.getVal(*i) != Map::DANGER && map.getAdjacencies(*i).size() <= 3) {
 			return;
@@ -193,7 +193,7 @@ void Bot::skirt(Map &map)
 		path = longestpath.search(player, map);
 		return;
 	}
-
+	
 	return;
 }
 
