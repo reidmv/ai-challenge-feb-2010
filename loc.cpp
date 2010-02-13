@@ -45,20 +45,20 @@ int Loc::getCol(void) const
 /*    Function: setRow                                                      */
 /* Description: Sets the row                                                */
 /*==========================================================================*/
-void Loc::setRow(int new_row)
+Loc& Loc::setRow(int new_row)
 {
 	row = new_row;
-	return;
+	return *this;
 }
 
 /*==========================================================================*/
 /*    Function: setCol                                                      */
 /* Description: Sets the col                                                */
 /*==========================================================================*/
-void Loc::setCol(int new_col)
+Loc& Loc::setCol(int new_col)
 {
 	col = new_col;
-	return;
+	return *this;
 }
 
 /*==========================================================================*/

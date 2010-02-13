@@ -32,6 +32,7 @@ namespace AI {
 			botstate       state;
 			int            counter;
 			std::list<Loc> path;
+			std::list<Loc> adjacencies;
 			AStar          astar;
 			Floodfill      floodfill;
 

@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -46,11 +47,14 @@ Map::~Map(void)
 	if (map) {
 		for (int i = 0; i < rows; ++i) {
 		    delete [] map[i];
+		    delete [] grid[i];
 		}
 		delete [] map;
+		delete [] grid;
 	}
 
-	map = 0;
+	map  = 0;
+	grid = 0;
 }
 
 /*==========================================================================*/
@@ -68,23 +72,28 @@ void Map::setMapSize(int newrows, int newcols)
 	if (map) {
 		for (int i = 0; i < rows; ++i) {
 		    delete [] map[i];
+				delete [] grid[i];
 		}
 		delete [] map;
+		delete [] grid;
 	}
 
 	rows = newrows;
 	cols = newcols;
 
 	// Allocate map
-	map = new int*[rows];
+	map  = new int*[rows];
+	grid = new int*[rows];
 	for (int i = 0; i < rows; ++i) {
-		map[i] = new int[cols];
+		map[i]  = new int[cols];
+		grid[i] = new int[cols];
 	}
 
 	// Initialize map to all FLOOR
 	for (int i = 0; i < rows; ++i) {
 		for (int j = 0; j < cols; ++j) {
-			map[i][j] = FLOOR;
+			map[i][j]  = FLOOR;
+			grid[i][j] = FLOOR;
 		}
 	}
 	return;
@@ -191,6 +200,45 @@ int Map::getFreespace(void) const
 void Map::makeMove(int move, FILE *file_handle) {
   fprintf(file_handle, "%d\n", move);
   fflush(file_handle);
+	
+	/*
+	////////
+	// debug
+	
+	switch (move) {
+		case 3: fprintf(stderr, "move: \\/\n");
+			break;
+		case 1: fprintf(stderr, "move: /\\\n");
+			break;
+		case 2: fprintf(stderr, "move: >>\n");
+			break;
+		case 4: fprintf(stderr, "move: <<\n");
+			break;
+	}
+  fflush(stderr);
+
+
+	for (int i = 0; i < rows; ++i) {
+		for (int j = 0; j < cols; ++j) {
+			fprintf(stderr, "%d, ", map[i][j]);
+		}
+		fprintf(stderr, "\n");
+	}
+	fprintf(stderr, "\n");
+	fflush(stderr);
+
+	for (int i = 0; i < rows; ++i) {
+		for (int j = 0; j < cols; ++j) {
+			fprintf(stderr, "%d, ", grid[i][j]);
+		}
+		fprintf(stderr, "\n");
+	}
+	fprintf(stderr, "\n");
+	fflush(stderr);
+
+	// debug
+	////////
+	*/
 }
 
 /*==========================================================================*/
@@ -349,25 +397,53 @@ list<Loc> Map::getAdjacencies(Loc &loc)
 			}
 
 			// note the new location, and add it to the list of adjacencies
-			adjacency.setRow(i);
-			adjacency.setCol(j);
+			adjacency.setRow(i).setCol(j);
 			adjacencies.push_back(adjacency);
 		}
 	}
 
-	/*
-	// if no adjacencies were returned, we're done here
-	if (adjacencies.size() == 0) {
-		return adjacencies;
-	}
-
-	// mix up the order a bit just to make things interesting
-	ticker++;
-	for (int i = ticker % AI::TICKER_MOD; i > 0; i--) {
-		adjacencies.push_back(adjacencies.front());
-		adjacencies.pop_front();
-	}
-	*/
-
 	return adjacencies;
+}
+
+/*==========================================================================*/
+/*    Function: floodfillScore                                              */
+/* Description: Returns a floodfill metric for the specified location.      */
+/*==========================================================================*/
+int  Map::floodfillScore(Loc &loc)
+{
+	// reset the grid
+	for (int i = 0; i < rows; ++i) {
+		for (int j = 0; j < cols; ++j) {
+			grid[i][j] = map[i][j];
+		}
+	}
+
+	// recursively floodfill
+	return floodfillRecurse(loc.getRow(), loc.getCol());
+}
+
+/*==========================================================================*/
+/*    Function: floodfillRecurse                                            */
+/* Description: Recursive floodfill                                         */
+/*==========================================================================*/
+int  Map::floodfillRecurse(int row, int col)
+{
+	int count = 1;
+	if (row >= 0    ||
+	    row <  rows || 
+	    col >= 0    ||
+	    col <  cols || 
+			map[row][col] != FLOOR)
+	{
+		return 0;
+	}
+
+	grid[row][col] = WALL;
+
+	count += floodfillRecurse(row, col + 1);
+	count += floodfillRecurse(row, col - 1);
+	count += floodfillRecurse(row + 1, col);
+	count += floodfillRecurse(row - 1, col);
+
+	return count;
 }

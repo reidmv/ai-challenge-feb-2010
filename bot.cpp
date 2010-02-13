@@ -40,6 +40,9 @@ Loc Bot::makeMove(Map &map)
 	Loc opponent = map.getOpponent();
 	int oppDist = player.distanceFrom(opponent);
 
+	// note adjacent locations
+	adjacencies = map.getAdjacencies(player);
+
 	// choose a strategy based on the current state
 	switch (state) {
 		case CHARGE:
@@ -72,6 +75,39 @@ Loc Bot::makeMove(Map &map)
 /*==========================================================================*/
 void Bot::charge(Loc &player, Loc &opponent, int oppDist, Map &map)
 {
+	Loc adjacency;
+	int cur_floodsize = 0;
+	int new_floodsize = 0;
+	int floodsize_diffs = -1;
+	std::list<Loc>::iterator erase_me;
+	std::list<Loc>::iterator i = adjacencies.begin();
+
+	// it's astar. it's fast. we're starting over here.
+	path.clear();
+
+	// filter adjacencies to only consider FLOOR
+	while (i != adjacencies.end()) {
+		if (map.getVal(*i) != Map::FLOOR) {
+			erase_me = i;
+			i++;
+			adjacencies.erase(erase_me);
+		} else if ((new_floodsize = map.floodfillScore(*i)) > cur_floodsize) {
+			cur_floodsize = new_floodsize;
+			floodsize_diffs++;
+			adjacency = *i;
+			i++;
+		} else {
+			i++;
+		}
+	}
+
+	// if there was a floodsize returned that was larer than the others, take
+	// that path.
+	if (floodsize_diffs > 0) {
+		path.push_front(adjacency);
+		return;
+	}
+
 	// default action
 	path = astar.search(player, opponent, map);
 	if (!path.empty()) {
@@ -132,7 +168,6 @@ void Bot::skirt(Loc &player, Loc &opponent, int oppDist, Map &map)
 void Bot::simple(Loc &player, Map &map)
 {
 	// default action
-	std::list<Loc> adjacencies = map.getAdjacencies(player);
 	std::list<Loc>::iterator i;
 
 	path.clear();

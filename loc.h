@@ -18,8 +18,8 @@ class Loc
 
 		int  getRow(void) const;
 		int  getCol(void) const;
-		void setRow(int new_row);
-		void setCol(int new_col);
+		Loc& setRow(int new_row);
+		Loc& setCol(int new_col);
 		int  distanceFrom(const Loc &comp) const;
 
 		bool operator==(const Loc &comp) const;

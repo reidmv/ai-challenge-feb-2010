@@ -32,6 +32,7 @@ class Map
 		Loc  getOpponent(void);
 		int  getFreespace(void) const;
 		std::list<Loc> getAdjacencies(Loc &loc);
+		int  floodfillScore(Loc &loc);
 
 		void makeMove(int move, FILE *file_handle);
 		void makeMove(Loc &move, FILE *file_handle);
@@ -41,6 +42,7 @@ class Map
 
 	private:
 		int  **map;
+		int  **grid;
 		int  rows;
 		int  cols;
 		int  freespace;
@@ -49,6 +51,7 @@ class Map
 		Loc  opponent;
 
 		void markDanger(void);
+		int  floodfillRecurse(int row, int col);
 };
 
 #endif
