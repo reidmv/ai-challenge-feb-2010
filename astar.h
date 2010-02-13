@@ -32,7 +32,7 @@ namespace AI {
 			std::list<Loc> search(Loc &p_start,
 			                      Loc &p_end, 
 			                      Map &p_map,
-			                      int margin = USEC_MARGIN);
+			                      int margin = USEC_MAXTIME);
 
 		private:
 			std::list<AStarNode> openList; // nodes that can be reached
@@ -48,8 +48,14 @@ namespace AI {
 
 			// returns the node of least cost from the openList
 			AStarNode* leastCost();
+
+			// returns the cost to the destination from the specificed loc
 			int  costFrom(AStarNode &loc);
+
+			// adds nodes adjacent to curr to the openList
 			void addAdjacent(AStarNode &curr);
+
+			// returns true if the curr Loc is in the closedList
 			bool inClosed(Loc &curr);
 	};
 }

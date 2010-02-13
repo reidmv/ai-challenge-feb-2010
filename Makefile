@@ -9,8 +9,8 @@ COMPILE     = $(CC) $(CFLAGS) -c
 LD          = $(CC) 
  
 EXECUTABLE  = MyTronBot
-SOURCES     = MyTronBot.cc map.cpp astar.cpp loc.cpp astarnode.cpp floodfill.cpp bot.cpp
-HEADERS     = map.h astar.h loc.h astarnode.h floodfill.h bot.h ai.h
+SOURCES     = MyTronBot.cc map.cpp astar.cpp loc.cpp astarnode.cpp longestpath.cpp bot.cpp
+HEADERS     = map.h astar.h loc.h astarnode.h longestpath.h bot.h ai.h
 OBJECTS     = $(SOURCES:.cpp=.o) 
 
 all : $(SOURCES) $(EXECUTABLE)

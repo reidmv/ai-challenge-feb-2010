@@ -7,7 +7,7 @@
 #include "map.h"
 #include "loc.h"
 #include "astar.h"
-#include "floodfill.h"
+#include "longestpath.h"
 #include <list>
 #include <ctime>
 #include <sys/time.h>
@@ -35,10 +35,9 @@ Bot::~Bot(void)
 /*==========================================================================*/
 Loc Bot::makeMove(Map &map)
 {
-	Loc move;
-	player = map.getPlayer();
-	opponent = map.getOpponent();
-	int oppDist = player.distanceFrom(opponent);
+	Loc move;                     // the move to be returned
+	player = map.getPlayer();     // set the bot's current location
+	opponent = map.getOpponent(); // set the opponent's current location
 
 	// note adjacent locations
 	adjacencies = map.getAdjacencies(player);
@@ -52,23 +51,19 @@ Loc Bot::makeMove(Map &map)
 
 	// choose a strategy based on the current state
 	switch (state) {
-		case CHARGE:
-			charge(player, opponent, oppDist, map);
+		case CHARGE: charge(map);
 			break;
-		case FILL:
-			fill(player, opponent, oppDist, map);
-			//path = floodfill.search(player, map);
+		case FILL: fill(map);
 			break;
-		case SKIRT:
-			skirt(player, opponent, oppDist, map);
+		case SKIRT: skirt(map);
 			break;
-		default:
+		default: simple(map);
 			break;
 	}
 
 	// if there are no moves in the move list, do SOMETHING
 	if (path.empty()) {
-		simple(player, map);
+		simple(map);
 	} 
 
 	move = path.front();
@@ -121,8 +116,10 @@ bool Bot::chooseSides(Map &map)
 /*==========================================================================*/
 /* CHARGE                                                                   */
 /*==========================================================================*/
-void Bot::charge(Loc &player, Loc &opponent, int oppDist, Map &map)
+void Bot::charge(Map &map)
 {
+	int oppDist; // distance metric to opponent
+
 	// default action
 	path = astar.search(player, opponent, map);
 	if (!path.empty()) {
@@ -130,14 +127,14 @@ void Bot::charge(Loc &player, Loc &opponent, int oppDist, Map &map)
 	} else {
 		counter = AI::FILL_MOVES;
 		state = FILL;
-		path = floodfill.search(player, map, 200000);
+		path = longestpath.search(player, map, 200000);
 	}
 
 	// break out of state charge conditions
 	if (oppDist < AI::CHARGE_STOP) {
 		counter = AI::SKIRT_MOVES;
 		state = SKIRT;
-		path = floodfill.search(player, map);
+		path = longestpath.search(player, map);
 	}
 
 	return;
@@ -146,14 +143,14 @@ void Bot::charge(Loc &player, Loc &opponent, int oppDist, Map &map)
 /*==========================================================================*/
 /* FILL                                                                     */
 /*==========================================================================*/
-void Bot::fill(Loc &player, Loc &opponent, int oppDist, Map &map)
+void Bot::fill(Map &map)
 {
 	// default action
 	if (counter > 0 && !path.empty()) {
 		counter--;
 		return;
 	} else {
-		path = floodfill.search(player, map);
+		path = longestpath.search(player, map);
 		counter = AI::FILL_MOVES;
 	}
 
@@ -163,7 +160,7 @@ void Bot::fill(Loc &player, Loc &opponent, int oppDist, Map &map)
 /*==========================================================================*/
 /* SKIRT                                                                    */
 /*==========================================================================*/
-void Bot::skirt(Loc &player, Loc &opponent, int oppDist, Map &map)
+void Bot::skirt(Map &map)
 {
 	std::list<Loc>::iterator i;	
 
@@ -172,7 +169,7 @@ void Bot::skirt(Loc &player, Loc &opponent, int oppDist, Map &map)
 	path = astar.search(opponent, player, map);
 	
 	if (path.size() == 0) {
-		path = floodfill.search(player, map);
+		path = longestpath.search(player, map);
 		return;
 	}
 	
@@ -193,7 +190,7 @@ void Bot::skirt(Loc &player, Loc &opponent, int oppDist, Map &map)
 	}
 
 	if (path.size() == 0) {
-		path = floodfill.search(player, map);
+		path = longestpath.search(player, map);
 		return;
 	}
 
@@ -203,7 +200,7 @@ void Bot::skirt(Loc &player, Loc &opponent, int oppDist, Map &map)
 /*==========================================================================*/
 /* SIMPLE                                                                   */
 /*==========================================================================*/
-void Bot::simple(Loc &player, Map &map)
+void Bot::simple(Map &map)
 {
 	// default action
 	std::list<Loc>::iterator i;

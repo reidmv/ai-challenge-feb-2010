@@ -4,7 +4,7 @@
 // February 9, 2010
 
 #include "ai.h"
-#include "floodfill.h"
+#include "longestpath.h"
 #include <cmath>
 #include <cstdlib>
 #include <list>
@@ -15,32 +15,38 @@ using namespace std;
 /*==========================================================================*/
 /* Constructor                                                              */
 /*==========================================================================*/
-Floodfill::Floodfill(void)
+LongestPath::LongestPath(void)
 {
 }
 
 /*==========================================================================*/
 /* Destructor                                                               */
 /*==========================================================================*/
-Floodfill::~Floodfill(void)
+LongestPath::~LongestPath(void)
 {
 }
 
 /*==========================================================================*/
-/* Search                                                                   */
+/*    Function: search                                                      */
+/* Description: Returns a list of nodes representing the longest path found */
+/*              starting at the given node. The search will terminate when  */
+/*              either maxtime has progressed or all possible paths have    */
+/*              been explored.                                              */
 /*==========================================================================*/
-list<Loc> Floodfill::search(Loc &start, Map &map, int margin)
+list<Loc> LongestPath::search(Loc &start, Map &map, int maxtime)
 {
-	list<Loc>         result;
-	list< list<Loc> > adjacencyList;
-	list<Loc>         emptyAdjacency; 
+	list< list<Loc> > adjacencyList;  // stack of adjacency lists
+	list<Loc>         emptyAdjacency; // an empty adjacency list for pushing
+	int               elapsedtime;    // the time elapsed thus far
 
 	// start the timer
 	gettimeofday(&t_beg, NULL);
 
+	// setup; make sure our results are blank
 	path.clear();
 	longest_path.clear();
 
+	// prime the starting location
 	path.push_back(start);
 	adjacencyList.push_front(emptyAdjacency);
 	adjacencyList.front() = getAdjacencies(start, map);
@@ -66,8 +72,9 @@ list<Loc> Floodfill::search(Loc &start, Map &map, int margin)
 		// calculate elapsed time
 		gettimeofday(&t_end, NULL);
 		timersub(&t_end, &t_beg, &t_tot);
+		elapsedtime = 1000000 * t_tot.tv_sec + t_tot.tv_usec;
 
-	} while(path.size() > 0 && t_tot.tv_usec < margin);
+	} while(path.size() > 0 && elapsedtime < maxtime);
 
 	// return the longest path we've found so far
 	if (path.size() > longest_path.size()) {
@@ -82,17 +89,19 @@ list<Loc> Floodfill::search(Loc &start, Map &map, int margin)
 }
 
 /*==========================================================================*/
-/* Adjacencies                                                              */
+/*    Function: getAdjacencies                                              */
+/* Description: Returns a list of nodes adjacent to the given location on   */
+/*              the given map.                                              */
 /*==========================================================================*/
-list<Loc> Floodfill::getAdjacencies(Loc &loc, Map &map)
+list<Loc> LongestPath::getAdjacencies(Loc &loc, Map &map)
 {
 	list<Loc>::iterator erase_me;
 	list<Loc> adjacencies = map.getAdjacencies(loc);
 	list<Loc>::iterator i = adjacencies.begin();
 
+	// clear adjacent nodes not of type FLOOR
 	while (i != adjacencies.end()) {
-		if ((map.getVal(*i) != Map::FLOOR) || // && map.getVal(*i) != Map::DANGER) ||
-				 inPath(*i)) {
+		if ((map.getVal(*i) != Map::FLOOR) || inPath(*i)) {
 			erase_me = i;
 			i++;
 			adjacencies.erase(erase_me);
@@ -101,13 +110,16 @@ list<Loc> Floodfill::getAdjacencies(Loc &loc, Map &map)
 		}
 	}
 
+	// return adjacent nodes
 	return adjacencies;
 }
 
 /*==========================================================================*/
-/* inPath                                                                   */
+/*    Function: inPath                                                      */
+/* Description: Returns true if the given node is already in the current    */
+/*              path.                                                       */
 /*==========================================================================*/
-bool Floodfill::inPath(Loc &loc)
+bool LongestPath::inPath(Loc &loc)
 {
 	list<Loc>::iterator i;
 
