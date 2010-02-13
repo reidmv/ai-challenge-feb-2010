@@ -201,7 +201,6 @@ void Map::makeMove(int move, FILE *file_handle) {
   fprintf(file_handle, "%d\n", move);
   fflush(file_handle);
 	
-	/*
 	////////
 	// debug
 	
@@ -218,6 +217,7 @@ void Map::makeMove(int move, FILE *file_handle) {
   fflush(stderr);
 
 
+	/*
 	for (int i = 0; i < rows; ++i) {
 		for (int j = 0; j < cols; ++j) {
 			fprintf(stderr, "%d, ", map[i][j]);
@@ -235,10 +235,10 @@ void Map::makeMove(int move, FILE *file_handle) {
 	}
 	fprintf(stderr, "\n");
 	fflush(stderr);
+	*/
 
 	// debug
 	////////
-	*/
 }
 
 /*==========================================================================*/

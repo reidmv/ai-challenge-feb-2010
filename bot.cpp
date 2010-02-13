@@ -189,7 +189,7 @@ void Bot::skirt(Loc &player, Loc &opponent, int oppDist, Map &map)
 	if (counter > 0) {
 		counter--;
 	} else {
-		state = CHARGE;
+		//state = CHARGE;
 	}
 
 	if (path.size() == 0) {
