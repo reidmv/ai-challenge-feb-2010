@@ -35,11 +35,14 @@ namespace AI {
 			std::list<Loc> adjacencies;
 			AStar          astar;
 			Floodfill      floodfill;
+			Loc            player;
+			Loc            opponent;
 
 			void charge(Loc &player, Loc &opponent, int oppDist, Map &map);
 			void fill(Loc &player, Loc &opponent, int oppDist, Map &map);
 			void skirt(Loc &player, Loc &opponent, int oppDist, Map &map);
 			void simple(Loc &player, Map &map);
+			bool chooseSides(Map &map);
 	};
 }
 

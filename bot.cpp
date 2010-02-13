@@ -36,12 +36,19 @@ Bot::~Bot(void)
 Loc Bot::makeMove(Map &map)
 {
 	Loc move;
-	Loc player = map.getPlayer();
-	Loc opponent = map.getOpponent();
+	player = map.getPlayer();
+	opponent = map.getOpponent();
 	int oppDist = player.distanceFrom(opponent);
 
 	// note adjacent locations
 	adjacencies = map.getAdjacencies(player);
+
+	// if there's a choice between two areas, choose the larger. period.
+	if (chooseSides(map)) {
+		move = path.front();
+		path.pop_front();
+		return move;
+	}
 
 	// choose a strategy based on the current state
 	switch (state) {
@@ -71,9 +78,9 @@ Loc Bot::makeMove(Map &map)
 }
 
 /*==========================================================================*/
-/* CHARGE                                                                   */
+/* chooseSides                                                              */
 /*==========================================================================*/
-void Bot::charge(Loc &player, Loc &opponent, int oppDist, Map &map)
+bool Bot::chooseSides(Map &map)
 {
 	Loc adjacency;
 	int cur_floodsize = 0;
@@ -101,13 +108,21 @@ void Bot::charge(Loc &player, Loc &opponent, int oppDist, Map &map)
 		}
 	}
 
-	// if there was a floodsize returned that was larer than the others, take
+	// if there was a floodsize returned that was larger than the others, take
 	// that path.
 	if (floodsize_diffs > 0) {
 		path.push_front(adjacency);
-		return;
+		return true;
+	} else {
+		return false;
 	}
+}
 
+/*==========================================================================*/
+/* CHARGE                                                                   */
+/*==========================================================================*/
+void Bot::charge(Loc &player, Loc &opponent, int oppDist, Map &map)
+{
 	// default action
 	path = astar.search(player, opponent, map);
 	if (!path.empty()) {
@@ -150,14 +165,37 @@ void Bot::fill(Loc &player, Loc &opponent, int oppDist, Map &map)
 /*==========================================================================*/
 void Bot::skirt(Loc &player, Loc &opponent, int oppDist, Map &map)
 {
+	std::list<Loc>::iterator i;	
+
+	// note path to opponent
+	path.clear();
+	path = astar.search(opponent, player, map);
+	
+	if (path.size() == 0) {
+		path = floodfill.search(player, map);
+		return;
+	}
+	
+	// pop off the player location
+	path.pop_back();
+
+	for (i = path.begin(); i != path.end(); i++) {
+		if (map.getVal(*i) != Map::DANGER && map.getAdjacencies(*i).size() <= 3) {
+			return;
+		}
+	}
+
 	// default action
 	if (counter > 0) {
 		counter--;
 	} else {
 		state = CHARGE;
 	}
-	
-	path = floodfill.search(player, map);
+
+	if (path.size() == 0) {
+		path = floodfill.search(player, map);
+		return;
+	}
 
 	return;
 }
