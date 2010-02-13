@@ -58,7 +58,7 @@ list<Loc> AStar::search(Loc &p_start, Loc &p_end, Map &p_map, int margin)
 	do
 	{
 		// set the current location
-		least_cost = leastCost(openList);
+		least_cost = leastCost();
 		if (least_cost == 0) {
 			break;
 		}
@@ -98,7 +98,7 @@ list<Loc> AStar::search(Loc &p_start, Loc &p_end, Map &p_map, int margin)
 /* Description: Returns the node of least cost from the list given          */
 /*              (it is expected that the list given is the open list).      */
 /*==========================================================================*/
-AStarNode* AStar::leastCost(list<AStarNode> &open_list)
+AStarNode* AStar::leastCost()
 {
 	list<AStarNode>::iterator i;
 	list<AStarNode>::iterator closed;
@@ -107,7 +107,7 @@ AStarNode* AStar::leastCost(list<AStarNode> &open_list)
 	int cost;
 
 	// validate list not empty
-	if (open_list.empty()) {
+	if (openList.empty()) {
 		return 0;
 	}
 
@@ -115,13 +115,13 @@ AStarNode* AStar::leastCost(list<AStarNode> &open_list)
 	minCost = static_cast<unsigned>(-1) >> 1;
 
 	// iterate through the list and return the minimum cost option
-	i = open_list.begin();
-	minInList = open_list.end();
-	while (i != open_list.end()) {
+	i = openList.begin();
+	minInList = openList.end();
+	while (i != openList.end()) {
 		if (inClosed(*i)) { // if location is closed, del from openList
 			closed = i;
 			i++;
-			open_list.erase(closed);
+			openList.erase(closed);
 		} else {            // otherwise, calculate cost
 			cost = costFrom(*i);
 			if (cost < minCost) {
@@ -132,7 +132,7 @@ AStarNode* AStar::leastCost(list<AStarNode> &open_list)
 		}
 	}
 
-	if (minInList == open_list.end()) {
+	if (minInList == openList.end()) {
 		return 0;
 	}
 
@@ -154,8 +154,7 @@ int AStar::costFrom(AStarNode &curr)
 
 /*==========================================================================*/
 /*    Function: addAdjacent                                                 */
-/* Description: Adds locations adjacent to the given loc to the given       */
-/*              open_list                                                   */
+/* Description: Adds locations adjacent to the given loc to the openList    */
 /*==========================================================================*/
 void AStar::addAdjacent(AStarNode &loc)
 {
