@@ -21,18 +21,17 @@ class Map
 		Map(int newrows, int newcols);
 		~Map(void); 
 
-		int  getRows(void);
-		int  getCols(void);
+		int  getRows(void) const;
+		int  getCols(void) const;
+		void setMapSize(int newrows, int newcols); 
 		int  getVal(int getrow, int getcol) const;
 		int  getVal(const Loc &loc) const;
 		int  setVal(int row, int col, int value);
 		int  setVal(Loc &loc, int value);
-		void setMapSize(int newrows, int newcols); 
 		Loc  getPlayer(void);
 		Loc  getOpponent(void);
-		int  getFreespace(void) const;
+		int  floodfill(Loc &loc);
 		std::list<Loc> getAdjacencies(Loc &loc);
-		int  floodfillScore(Loc &loc);
 
 		void makeMove(int move, FILE *file_handle);
 		void makeMove(Loc &move, FILE *file_handle);
@@ -45,7 +44,6 @@ class Map
 		int  **grid;
 		int  rows;
 		int  cols;
-		int  freespace;
 		int  ticker;
 		Loc  player;
 		Loc  opponent;

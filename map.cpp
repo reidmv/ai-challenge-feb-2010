@@ -21,7 +21,6 @@ Map::Map(void)
 	rows      = -1;
 	cols      = -1;
 	map       =  0;
-	freespace = 0;
 	ticker    = 0;
 }
 
@@ -33,7 +32,6 @@ Map::Map(int newrows, int newcols)
 	rows      = -1;
 	cols      = -1;
 	map       =  0;
-	freespace =  0;
 	setMapSize(newrows, newcols);
 
 	return;
@@ -55,6 +53,24 @@ Map::~Map(void)
 
 	map  = 0;
 	grid = 0;
+}
+
+/*==========================================================================*/
+/*    Function: getRows                                                     */
+/* Description: Returns the number of rows in the Map.                      */
+/*==========================================================================*/
+int Map::getRows() const
+{
+	return rows;
+}
+
+/*==========================================================================*/
+/*    Function: getCols                                                     */
+/* Description: Returns the number of cols in the Map.                      */
+/*==========================================================================*/
+int Map::getCols() const
+{
+	return cols;
 }
 
 /*==========================================================================*/
@@ -100,24 +116,6 @@ void Map::setMapSize(int newrows, int newcols)
 }
 
 /*==========================================================================*/
-/*    Function: getRows                                                     */
-/* Description: Returns the number of rows in the Map.                      */
-/*==========================================================================*/
-int Map::getRows()
-{
-	return rows;
-}
-
-/*==========================================================================*/
-/*    Function: getCols                                                     */
-/* Description: Returns the number of cols in the Map.                      */
-/*==========================================================================*/
-int Map::getCols()
-{
-	return cols;
-}
-
-/*==========================================================================*/
 /*    Function: getVal()                                                    */
 /* Description: Returns the map value for a specified row and col.          */
 /*==========================================================================*/
@@ -129,24 +127,6 @@ int Map::getVal(int getrow, int getcol) const
 	}
 
 	return map[getrow][getcol];
-}
-
-/*==========================================================================*/
-/*    Function: getPlayer()                                                 */
-/* Description: Returns the map value for the player                        */
-/*==========================================================================*/
-Loc Map::getPlayer(void)
-{
-	return player;
-}
-
-/*==========================================================================*/
-/*    Function: getOpponent()                                               */
-/* Description: Returns the map value for the opponent                      */
-/*==========================================================================*/
-Loc Map::getOpponent(void)
-{
-	return opponent;
 }
 
 /*==========================================================================*/
@@ -185,12 +165,21 @@ int Map::setVal(Loc &loc, int value)
 }
 
 /*==========================================================================*/
-/*    Function: getFreespace()                                              */
-/* Description: Returns the number of "free" spaces in the map              */
+/*    Function: getPlayer()                                                 */
+/* Description: Returns the map value for the player                        */
 /*==========================================================================*/
-int Map::getFreespace(void) const
+Loc Map::getPlayer(void)
 {
-	return freespace;
+	return player;
+}
+
+/*==========================================================================*/
+/*    Function: getOpponent()                                               */
+/* Description: Returns the map value for the opponent                      */
+/*==========================================================================*/
+Loc Map::getOpponent(void)
+{
+	return opponent;
 }
 
 /*==========================================================================*/
@@ -277,8 +266,6 @@ void Map::ReadFromFile(FILE *file_handle) {
 	int player_two_x;
 	int player_two_y;
 	
-	freespace = 0;
-
   int num_items = fscanf(file_handle, "%d %d\n", &map_width, &map_height);
   if (feof(file_handle) || num_items < 2) {
     exit(0); // End of stream means end of game. Just exit.
@@ -316,7 +303,6 @@ void Map::ReadFromFile(FILE *file_handle) {
 	return;
       }
       map[x][y] = FLOOR;
-      ++freespace;
       ++x;
       break;
     case '1':
@@ -406,10 +392,10 @@ list<Loc> Map::getAdjacencies(Loc &loc)
 }
 
 /*==========================================================================*/
-/*    Function: floodfillScore                                              */
+/*    Function: floodfill                                                   */
 /* Description: Returns a floodfill metric for the specified location.      */
 /*==========================================================================*/
-int  Map::floodfillScore(Loc &loc)
+int  Map::floodfill(Loc &loc)
 {
 	// reset the grid
 	for (int i = 0; i < rows; ++i) {

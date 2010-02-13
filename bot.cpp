@@ -93,7 +93,7 @@ bool Bot::chooseSides(Map &map)
 			erase_me = i;
 			i++;
 			adjacencies.erase(erase_me);
-		} else if ((new_floodsize = map.floodfillScore(*i)) > cur_floodsize) {
+		} else if ((new_floodsize = map.floodfill(*i)) > cur_floodsize) {
 			cur_floodsize = new_floodsize;
 			floodsize_diffs++;
 			adjacency = *i;
