@@ -9,6 +9,8 @@
 #include <cstdlib>
 #include <list>
 
+#include <cstdio>
+
 using namespace AI;
 using namespace std;
 
@@ -17,6 +19,10 @@ using namespace std;
 /*==========================================================================*/
 LongestPath::LongestPath(void)
 {
+	path.clear();
+	longest_path.clear();
+	adjacencyList.clear();
+	emptyAdjacency.clear();
 }
 
 /*==========================================================================*/
@@ -35,6 +41,9 @@ LongestPath::~LongestPath(void)
 /*==========================================================================*/
 list<Loc> LongestPath::search(Loc &start, Map &map, int maxtime)
 {
+	// start the timer
+	gettimeofday(&t_beg, NULL);
+
 	return newSearch(start, map, maxtime);
 }
 
@@ -67,12 +76,19 @@ list<Loc> & LongestPath::newSearch(Loc &start, Map &map, int maxtime)
 list<Loc> LongestPath::continueSearch(Loc &start, Map &map, int maxtime)
 {
 	list<Loc>::iterator i;
+	int j = 0;
+
+	// start the timer
+	gettimeofday(&t_beg, NULL);
 
 	// move the beginning of the lists to match the new origin point
-	for (i = path.begin(); i != path.end() && *i != start; i++) {
+	i = path.begin();
+	while (i != path.end() && *i != start) {
+		i++;
 		path.pop_front();
 		longest_path.pop_front();
 		adjacencyList.pop_front();
+		j++;
 	}
 
 	// if the path is now empty, the search is not continueable. Start anew.
@@ -90,9 +106,6 @@ list<Loc> LongestPath::continueSearch(Loc &start, Map &map, int maxtime)
 list<Loc> & LongestPath::generatePath(Loc &start, Map &map, int maxtime)
 {
 	int elapsedtime; // the time elapsed thus far
-
-	// start the timer
-	gettimeofday(&t_beg, NULL);
 
 	do
 	{
@@ -120,14 +133,16 @@ list<Loc> & LongestPath::generatePath(Loc &start, Map &map, int maxtime)
 	} while(path.size() > 0 && elapsedtime < maxtime);
 
 	// return the longest path we've found so far
-	if (path.size() > longest_path.size()) {
+	if (longest_path.size() < path.size()) {
 		longest_path = path;
 	}
 
 	// pop off the front of the stack, which is the player's current location
-	if (!longest_path.empty()) {
-		path.pop_front();
+	if (!longest_path.empty() && longest_path.front() == start) {
 		longest_path.pop_front();
+	}
+	if (!path.empty() && path.front() == start) {
+		path.pop_front();
 		adjacencyList.pop_front();
 	}
 

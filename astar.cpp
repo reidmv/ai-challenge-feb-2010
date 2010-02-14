@@ -191,8 +191,6 @@ bool AStar::inClosed(Loc &curr)
 {
 	list<Loc>::iterator i;
 
-	//int debug = closedList.size();
-
 	for (i = closedList.begin(); i != closedList.end(); i++) {
 		if (*i == curr) {
 			return true;

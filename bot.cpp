@@ -86,7 +86,7 @@ bool Bot::chooseSides(Map &map)
 	while (i != adjacencies.end()) {
 
 		// move along if the adjacency isn't a floor space
-		if (map.getVal(*i) != Map::FLOOR) {
+		if (map.getVal(*i) != Map::FLOOR && map.getVal(*i) != Map::DANGER) {
 			i++;
 			continue;
 		}
@@ -121,6 +121,8 @@ bool Bot::chooseSides(Map &map)
 /*==========================================================================*/
 void Bot::charge(Map &map)
 {
+	int oppDist; // distance metric to opponent
+	
 	/////////
 	// debug
 	#ifdef DEBUG
@@ -134,8 +136,6 @@ void Bot::charge(Map &map)
 		return;
 	}
 
-	int oppDist; // distance metric to opponent
-
 	// default action
 	path = astar.search(player, opponent, map);
 	if (!path.empty()) {
@@ -145,6 +145,14 @@ void Bot::charge(Map &map)
 		state = FILL;
 		path = longestpath.search(player, map, 200000);
 	}
+
+	/////////
+	// debug
+	#ifdef DEBUG
+	std::cerr << "CHARGE: oppDist = " << oppDist << std::endl;
+	#endif
+	// debug
+	/////////
 
 	// break out of state charge conditions
 	if (oppDist < AI::CHARGE_STOP) {
@@ -174,7 +182,7 @@ void Bot::fill(Map &map)
 		counter--;
 		return;
 	} else {
-		path = longestpath.search(player, map);
+		path = longestpath.continueSearch(player, map);
 		counter = AI::FILL_MOVES;
 	}
 
@@ -198,6 +206,15 @@ void Bot::skirt(Map &map)
 
 	// if there's a choice between two areas, choose the larger. period.
 	if (chooseSides(map)) {
+		
+		/////////
+		// debug
+		#ifdef DEBUG
+		std::cerr << "SKIRT: choosing sides" << std::endl;
+		#endif
+		// debug
+		/////////
+
 		return;
 	}
 
@@ -266,6 +283,10 @@ void Bot::simple(Map &map)
 bool Bot::hasChokepoint(std::list<Loc> &chokepath, Map &map)
 {
 	std::list<Loc>::iterator i;	
+
+	if (path.size() < 2) {
+		return false;
+	}
 
 	// look for chokepoints
 	for (i = path.begin(); i != path.end(); i++) {

@@ -190,25 +190,6 @@ void Map::makeMove(int move, FILE *file_handle) {
   fprintf(file_handle, "%d\n", move);
   fflush(file_handle);
 	
-	/////////
-	// debug
-	#ifdef DEBUG
-
-	switch (move) {
-		case 3: fprintf(stderr, "move: \\/\n");
-			break;
-		case 1: fprintf(stderr, "move: /\\\n");
-			break;
-		case 2: fprintf(stderr, "move: >>\n");
-			break;
-		case 4: fprintf(stderr, "move: <<\n");
-			break;
-	}
-  fflush(stderr);
-
-	#endif
-	// debug
-	/////////
 	
 	return;
 }
@@ -230,6 +211,27 @@ void Map::makeMove(Loc &move, FILE *file_handle)
 	} else {
 		intmove = 1; // north
 	}
+
+	/////////
+	// debug
+	#ifdef DEBUG
+
+	switch (intmove) {
+		case 3: fprintf(stderr, "move: \\/ ");
+			break;
+		case 1: fprintf(stderr, "move: /\\ ");
+			break;
+		case 2: fprintf(stderr, "move: >> ");
+			break; 
+		case 4: fprintf(stderr, "move: << ");
+			break;
+	}
+	fprintf(stderr, "{%d,%d}[%d]\n", move.getRow(), move.getCol(), getVal(move));
+  fflush(stderr);
+
+	#endif
+	// debug
+	/////////
 
 	makeMove(intmove, file_handle);
 }
@@ -320,7 +322,7 @@ void Map::ReadFromFile(FILE *file_handle) {
 	opponent.setRow(player_two_x);
 	opponent.setCol(player_two_y);
 
-	//markDanger();
+	markDanger();
 }
 
 /*==========================================================================*/
@@ -401,8 +403,9 @@ int  Map::floodfillRecurse(int row, int col)
 	if (row <  0    ||
 	    row >= rows || 
 	    col <  0    ||
-	    col >= cols || 
-			grid[row][col] != FLOOR)
+	    col >= cols || (
+			grid[row][col] != FLOOR &&
+			grid[row][col] != DANGER))
 	{
 		return 0;
 	}
