@@ -43,13 +43,6 @@ Loc Bot::makeMove(Map &map)
 	// note adjacent locations
 	adjacencies = map.getAdjacencies(player);
 
-	// if there's a choice between two areas, choose the larger. period.
-	if (chooseSides(map)) {
-		move = path.front();
-		path.pop_front();
-		return move;
-	}
-
 	// choose a strategy based on the current state
 	switch (state) {
 		case CHARGE: charge(map);
@@ -78,10 +71,11 @@ Loc Bot::makeMove(Map &map)
 /*==========================================================================*/
 bool Bot::chooseSides(Map &map)
 {
-	Loc adjacency;
-	int cur_floodsize = 0;
-	int new_floodsize = 0;
-	int floodsize_diffs = -1;
+	bool result;
+	Loc  adjacency;
+	int  prev_floodsize = 0;
+	int  curr_floodsize = 0;
+	int  floodsize_diffs = -1;
 	std::list<Loc>::iterator erase_me;
 	std::list<Loc>::iterator i = adjacencies.begin();
 
@@ -90,28 +84,36 @@ bool Bot::chooseSides(Map &map)
 
 	// filter adjacencies to only consider FLOOR
 	while (i != adjacencies.end()) {
+
+		// move along if the adjacency isn't a floor space
 		if (map.getVal(*i) != Map::FLOOR) {
-			erase_me = i;
 			i++;
-			adjacencies.erase(erase_me);
-		} else if ((new_floodsize = map.floodfill(*i)) > cur_floodsize) {
-			cur_floodsize = new_floodsize;
-			floodsize_diffs++;
-			adjacency = *i;
-			i++;
-		} else {
-			i++;
+			continue;
 		}
+
+		// select the space with the highest floodfill score
+		curr_floodsize = map.floodfill(*i);
+		if (curr_floodsize > prev_floodsize) {
+			adjacency = *i;
+		}
+		// keep track of how many different scores there are
+		if (curr_floodsize != prev_floodsize) {
+			floodsize_diffs++;
+		}
+		prev_floodsize = curr_floodsize;
+		i++;
 	}
 
 	// if there was a floodsize returned that was larger than the others, take
 	// that path.
 	if (floodsize_diffs > 0) {
 		path.push_front(adjacency);
-		return true;
+		result = true;
 	} else {
-		return false;
+		result = false;
 	}
+
+	return result;
 }
 
 /*==========================================================================*/
@@ -119,6 +121,19 @@ bool Bot::chooseSides(Map &map)
 /*==========================================================================*/
 void Bot::charge(Map &map)
 {
+	/////////
+	// debug
+	#ifdef DEBUG
+	std::cerr << "State: CHARGE" << std::endl;
+	#endif
+	// debug
+	/////////
+
+	// if there's a choice between two areas, choose the larger. period.
+	if (chooseSides(map)) {
+		return;
+	}
+
 	int oppDist; // distance metric to opponent
 
 	// default action
@@ -146,6 +161,14 @@ void Bot::charge(Map &map)
 /*==========================================================================*/
 void Bot::fill(Map &map)
 {
+	/////////
+	// debug
+	#ifdef DEBUG
+	std::cerr << "State: FILL" << std::endl;
+	#endif
+	// debug
+	/////////
+
 	// default action
 	if (counter > 0 && !path.empty()) {
 		counter--;
@@ -164,6 +187,19 @@ void Bot::fill(Map &map)
 void Bot::skirt(Map &map)
 {
 	std::list<Loc>::iterator i;	
+
+	/////////
+	// debug
+	#ifdef DEBUG
+	std::cerr << "State: SKIRT" << std::endl;
+	#endif
+	// debug
+	/////////
+
+	// if there's a choice between two areas, choose the larger. period.
+	if (chooseSides(map)) {
+		return;
+	}
 
 	// note path to opponent
 	path.clear();
@@ -202,6 +238,14 @@ void Bot::skirt(Map &map)
 /*==========================================================================*/
 void Bot::simple(Map &map)
 {
+	/////////
+	// debug
+	#ifdef DEBUG
+	std::cerr << "State: SIMPLE" << std::endl;
+	#endif
+	// debug
+	/////////
+
 	// default action
 	std::list<Loc>::iterator i;
 

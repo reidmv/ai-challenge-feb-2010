@@ -190,10 +190,10 @@ void Map::makeMove(int move, FILE *file_handle) {
   fprintf(file_handle, "%d\n", move);
   fflush(file_handle);
 	
-	/*
 	/////////
 	// debug
-	
+	#ifdef DEBUG
+
 	switch (move) {
 		case 3: fprintf(stderr, "move: \\/\n");
 			break;
@@ -206,9 +206,11 @@ void Map::makeMove(int move, FILE *file_handle) {
 	}
   fflush(stderr);
 
+	#endif
 	// debug
 	/////////
-	*/
+	
+	return;
 }
 
 /*==========================================================================*/
@@ -341,8 +343,7 @@ void Map::markDanger(void)
 
 /*==========================================================================*/
 /*    Function: getAdjacencies                                              */
-/* Description: Returns a list of locations adjacent to the given loc. Does */
-/*              not return walls or entities.                               */
+/* Description: Returns a list of locations adjacent to the given loc.      */
 /*==========================================================================*/
 list<Loc> Map::getAdjacencies(Loc &loc)
 {
@@ -395,16 +396,17 @@ int  Map::floodfill(Loc &loc)
 /*==========================================================================*/
 int  Map::floodfillRecurse(int row, int col)
 {
+	// terminate with 0 if the location is invalid or is a wall
 	int count = 1;
-	if (row >= 0    ||
-	    row <  rows || 
-	    col >= 0    ||
-	    col <  cols || 
-			map[row][col] != FLOOR)
+	if (row <  0    ||
+	    row >= rows || 
+	    col <  0    ||
+	    col >= cols || 
+			grid[row][col] != FLOOR)
 	{
 		return 0;
 	}
-
+		
 	grid[row][col] = WALL;
 
 	count += floodfillRecurse(row, col + 1);
