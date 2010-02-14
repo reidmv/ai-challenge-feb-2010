@@ -32,13 +32,26 @@ namespace AI {
 			                      Map &map,
 			                      int maxtime = USEC_MAXTIME);
 
+			// Continues an already-started search for the longest path.
+			std::list<Loc> continueSearch(Loc &start,
+			                              Map &map,
+			                              int maxtime = USEC_MAXTIME);
+
 		private:
-			std::list<Loc> path;          // the current path being expored
-			std::list<Loc> longest_path;  // the longest path yet found
+			std::list<Loc> path;           // the current path being expored
+			std::list<Loc> longest_path;   // the longest path yet found
+			std::list<Loc> emptyAdjacency; // an empty adjacency list for pushing
+			std::list< std::list<Loc> > adjacencyList; // adjacency list stack
 
 			struct timeval t_beg;         // The beginning time of a segment
 			struct timeval t_end;         // The ending time of a segment   
 			struct timeval t_tot;         // The elapsed time of a segment  
+
+			// Clears the lists and starts a new longest path search
+			std::list<Loc> & newSearch(Loc &start, Map &map, int maxtime);
+
+			// The internal engine used by search and continueSearch
+			std::list<Loc> & generatePath(Loc &start, Map &map, int maxtime);
 
 			// returns a list of adjacent nodes, given a node and a map
 			std::list<Loc> getAdjacencies(Loc &loc, Map &map);

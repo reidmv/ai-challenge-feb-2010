@@ -35,38 +35,81 @@ LongestPath::~LongestPath(void)
 /*==========================================================================*/
 list<Loc> LongestPath::search(Loc &start, Map &map, int maxtime)
 {
-	list< list<Loc> > adjacencyList;  // stack of adjacency lists
-	list<Loc>         emptyAdjacency; // an empty adjacency list for pushing
-	int               elapsedtime;    // the time elapsed thus far
+	return newSearch(start, map, maxtime);
+}
+
+/*==========================================================================*/
+/*    Function: newSearch                                                   */
+/* Description: Begins a new search with a clean set of lists               */
+/*==========================================================================*/
+list<Loc> & LongestPath::newSearch(Loc &start, Map &map, int maxtime)
+{
+	// setup; make sure our lists are blank
+	path.clear();
+	longest_path.clear();
+	adjacencyList.clear();
+	emptyAdjacency.clear();
+
+	// prime the starting location
+	path.push_back(start);
+	adjacencyList.push_back(emptyAdjacency);
+	adjacencyList.back() = getAdjacencies(start, map);
+
+	// let 'er rip!
+	return generatePath(start, map, maxtime);
+}
+
+/*==========================================================================*/
+/*    Function: continueSearch                                              */
+/* Description: Assumes an already in-progress search has been started and  */
+/*              continues from where the last search left off.              */
+/*==========================================================================*/
+list<Loc> LongestPath::continueSearch(Loc &start, Map &map, int maxtime)
+{
+	list<Loc>::iterator i;
+
+	// move the beginning of the lists to match the new origin point
+	for (i = path.begin(); i != path.end() && *i != start; i++) {
+		path.pop_front();
+		longest_path.pop_front();
+		adjacencyList.pop_front();
+	}
+
+	// if the path is now empty, the search is not continueable. Start anew.
+	if (path.empty()) {
+		return newSearch(start, map, maxtime);
+	} else {
+		return generatePath(start, map, maxtime);
+	}
+}
+
+/*==========================================================================*/
+/*    Function: generatePath                                                */
+/* Description: The internal engine used by search() and continueSearch()   */
+/*==========================================================================*/
+list<Loc> & LongestPath::generatePath(Loc &start, Map &map, int maxtime)
+{
+	int elapsedtime; // the time elapsed thus far
 
 	// start the timer
 	gettimeofday(&t_beg, NULL);
 
-	// setup; make sure our results are blank
-	path.clear();
-	longest_path.clear();
-
-	// prime the starting location
-	path.push_back(start);
-	adjacencyList.push_front(emptyAdjacency);
-	adjacencyList.front() = getAdjacencies(start, map);
-
 	do
 	{
 		// if we can go further, do so!
-		if (!adjacencyList.front().empty()) {
-			path.push_front(adjacencyList.front().front());
-			adjacencyList.front().pop_front();
-			//loc = path.front();
-			adjacencyList.push_front(emptyAdjacency);
-			adjacencyList.front() = getAdjacencies(path.front(), map);
+		if (!adjacencyList.back().empty()) {
+			path.push_back(adjacencyList.back().back());
+			adjacencyList.back().pop_back();
+			//loc = path.back();
+			adjacencyList.push_back(emptyAdjacency);
+			adjacencyList.back() = getAdjacencies(path.back(), map);
 		} else { // otherwise roll back
 			// save longest path yet found
 			if (path.size() > longest_path.size()) {
 				longest_path = path;
 			}
-			path.pop_front();
-			adjacencyList.pop_front();
+			path.pop_back();
+			adjacencyList.pop_back();
 		}
 
 		// calculate elapsed time
@@ -78,14 +121,17 @@ list<Loc> LongestPath::search(Loc &start, Map &map, int maxtime)
 
 	// return the longest path we've found so far
 	if (path.size() > longest_path.size()) {
-	  path.reverse();
-		path.pop_front();
-		return path;
-	} else {
-	  longest_path.reverse();
-		longest_path.pop_front();
-		return longest_path;
+		longest_path = path;
 	}
+
+	// pop off the front of the stack, which is the player's current location
+	if (!longest_path.empty()) {
+		path.pop_front();
+		longest_path.pop_front();
+		adjacencyList.pop_front();
+	}
+
+	return longest_path;
 }
 
 /*==========================================================================*/
