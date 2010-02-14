@@ -31,7 +31,11 @@ AStar::~AStar(void)
 /*    Function: search                                                      */
 /* Description: Returns a list of locations leading from start to end       */
 /*==========================================================================*/
-list<Loc> AStar::search(Loc &p_start, Loc &p_end, Map &p_map, int margin)
+list<Loc> AStar::search(Loc &p_start, 
+                        Loc &p_end,
+                        Map &p_map,
+                        bool include_origin,
+                        int margin)
 {
 	list<AStarNode> nodes; // holds nodes constructed during the search
 	list<Loc> result;      // the resulting list of locations
@@ -86,7 +90,7 @@ list<Loc> AStar::search(Loc &p_start, Loc &p_end, Map &p_map, int margin)
 	} while (openList.size() != 0 && t_tot.tv_usec < margin);
 
 	// if we managed to find a path, pop the first element (current location)
-	if (!result.empty()) {
+	if (!result.empty() && !include_origin) {
 		result.pop_front();
 	}
 

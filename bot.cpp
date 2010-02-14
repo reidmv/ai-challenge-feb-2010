@@ -103,7 +103,7 @@ bool Bot::chooseSides(Map &map)
 			adjacency = *i;
 		}
 		// keep track of how many different scores there are
-		if (curr_floodsize != prev_floodsize) {
+		if (curr_floodsize != prev_floodsize && map.getVal(*i) != Map::BLOCK) {
 			floodsize_diffs++;
 		}
 		prev_floodsize = curr_floodsize;
@@ -127,15 +127,7 @@ bool Bot::chooseSides(Map &map)
 /*==========================================================================*/
 void Bot::charge(Map &map)
 {
-	int                                   curr_score; 
-	int                                   prev_score; 
 	int                                   oppDist;
-	std::list<Loc>                       *best_path;
-	std::list<Loc>                        splice;
-	std::list<Loc>                        temp;
-	std::list< std::list<Loc> >           paths;
-	std::list<Loc>::iterator              i;
-	std::list< std::list<Loc> >::iterator j;
 	
 	/////////
 	// debug
@@ -151,18 +143,7 @@ void Bot::charge(Map &map)
 	}
 
 	// default action
-	paths.clear();
-	prev_score = -1;
-	for (i = adjacencies.begin(); i != adjacencies.end(); i++) {
-		paths.push_back(astar.search(*i, opponent, map));
-		curr_score = map.floodfillExcept(player, paths.back());
-		if (curr_score > prev_score) {
-			prev_score = curr_score;
-			best_path = &paths.back();
-		}
-	}
-	path.swap(*best_path);
-
+	path = astar.search(player, opponent, map); //calcBestPath(opponent, map);
 	if (!path.empty()) {
 		oppDist = path.size();
 	} else {
@@ -179,6 +160,61 @@ void Bot::charge(Map &map)
 		path = longestpath.search(player, map);
 	}
 
+	return;
+}
+
+/*==========================================================================*/
+/* calcBestPath                                                             */
+/*==========================================================================*/
+void Bot::calcBestPath(Loc &dest, Map &map) 
+{
+	int                                   curr_score; 
+	int                                   prev_score = -1;
+	int                                   score_diffs = -1;
+	std::list<Loc>                       *best_path;
+	std::list<Loc>                        spliced;
+	std::list<Loc>                        temp;
+	std::list< std::list<Loc> >           paths;
+	std::list<Loc>::iterator              i;
+	std::list< std::list<Loc> >::iterator j;
+	std::list< std::list<Loc> >::iterator k;
+
+	// calculate possible paths to dest starting on each adjacency
+	for (i = adjacencies.begin(); i != adjacencies.end(); i++) {
+		paths.push_back(astar.search(*i, dest, map, true));
+	}
+
+	// for each path, calculate floodfill score if others are excluded
+	for (j = paths.begin(); j != paths.end(); j++) {
+
+		// splice together all paths not the current path
+		spliced.clear();
+		for (k = paths.begin(); k != paths.end(); k++) {
+			if (k != j) {
+				temp = *k;
+				spliced.splice(spliced.end(), temp);
+			}
+		}
+
+		// determine a floodfill score for j
+		curr_score = map.floodfillExcept(j->front(), spliced);
+
+		std::cerr << "floodfillExcept: " << curr_score << std::endl;
+
+		// keep a pointer to the path with the highest floodfill score
+		if (prev_score < curr_score) {
+			best_path = &*j;
+			score_diffs++;
+		}
+	}
+
+	// swap in the winning path
+	if (score_diffs > 0) {
+		path.swap(*best_path);
+	} else {
+		path = astar.search(player, opponent, map);
+	}
+	
 	return;
 }
 

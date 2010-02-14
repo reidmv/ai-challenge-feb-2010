@@ -38,7 +38,7 @@ class Map
 		void makeMove(Loc &move, FILE *file_handle);
 		void ReadFromFile(FILE *file_handle);
 
-		enum Val { FLOOR, WALL, ENTITY, DANGER };
+		enum Val { FLOOR, WALL, ENTITY, DANGER, PLAYER, BLOCK };
 
 	private:
 		int  **map;

@@ -52,6 +52,9 @@ namespace AI {
 			// a backup routine to calculate a move when all else fails
 			void simple(Map &map);
 
+			// choose a best path to the given location
+			void calcBestPath(Loc &loc, Map &map);
+
 			// performs floodfill on all adjacencies to choose a room to favor
 			bool chooseSides(Map &map);
 

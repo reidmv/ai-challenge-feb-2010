@@ -295,7 +295,7 @@ void Map::ReadFromFile(FILE *file_handle) {
 	fprintf(stderr, "x >= width in Board_ReadFromStream\n");
 	return;
       }
-      map[x][y] = ENTITY;
+      map[x][y] = PLAYER;
       player_one_x = x;
       player_one_y = y;
       ++x;

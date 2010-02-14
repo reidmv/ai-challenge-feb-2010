@@ -32,6 +32,7 @@ namespace AI {
 			std::list<Loc> search(Loc &p_start,
 			                      Loc &p_end, 
 			                      Map &p_map,
+			                      bool include_origin = false,
 			                      int margin = USEC_MAXTIME);
 
 		private:
