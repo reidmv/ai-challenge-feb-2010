@@ -212,24 +212,16 @@ void Bot::skirt(Map &map)
 	}
 
 	// look for chokepoints
-	for (i = path.begin(); i != path.end(); i++) {
-		if (map.getVal(*i) != Map::DANGER && map.getAdjacencies(*i).size() <= 3) {
-			return;
-		}
-	}
-
-	// default action
-	if (counter > 0) {
+	if (hasChokepoint(path, map)) {
+		return;
+	} else if (counter > 0) {
 		counter--;
 	} else {
-		//state = CHARGE;
+		state = CHARGE;
 	}
 
-	if (path.size() == 0) {
-		path = longestpath.search(player, map);
-		return;
-	}
-	
+	path = longestpath.search(player, map);
+
 	return;
 }
 
@@ -266,4 +258,29 @@ void Bot::simple(Map &map)
 	}
 
 	return;
+}
+
+/*==========================================================================*/
+/* hasChokepoint                                                            */ 
+/*==========================================================================*/
+bool Bot::hasChokepoint(std::list<Loc> &chokepath, Map &map)
+{
+	std::list<Loc>::iterator i;	
+
+	// look for chokepoints
+	for (i = path.begin(); i != path.end(); i++) {
+		if (map.getVal(*i) != Map::DANGER && map.getAdjacencies(*i).size() <= 3) {
+			
+			/////////
+			// debug
+			#ifdef DEBUG
+			std::cerr << "SKIRT: Chokepoint found" << std::endl;
+			#endif
+			// debug
+			/////////
+			return true;
+		}
+	}
+
+	return false;
 }

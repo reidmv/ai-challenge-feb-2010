@@ -54,6 +54,9 @@ namespace AI {
 
 			// performs floodfill on all adjacencies to choose a room to favor
 			bool chooseSides(Map &map);
+
+			// returns true if there exists a chokepoint in given path
+			bool hasChokepoint(std::list<Loc> &chokepath, Map &map);
 	};
 }
 
