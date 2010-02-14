@@ -39,9 +39,21 @@ Loc Bot::makeMove(Map &map)
 	Loc move;                     // the move to be returned
 	player = map.getPlayer();     // set the bot's current location
 	opponent = map.getOpponent(); // set the opponent's current location
+	std::list<Loc>::iterator erase_me;
+	std::list<Loc>::iterator i;
 
-	// note adjacent locations
+	// note adjacent traversable locations
 	adjacencies = map.getAdjacencies(player);
+	i = adjacencies.begin();
+	while (i != adjacencies.end()) {
+		if ((map.getVal(*i) != Map::FLOOR) && map.getVal(*i) != Map::DANGER) {
+			erase_me = i;
+			i++;
+			adjacencies.erase(erase_me);
+		} else {
+			i++;
+		}
+	}
 
 	// choose a strategy based on the current state
 	switch (state) {
@@ -85,12 +97,6 @@ bool Bot::chooseSides(Map &map)
 	// filter adjacencies to only consider FLOOR
 	while (i != adjacencies.end()) {
 
-		// move along if the adjacency isn't a floor space
-		if (map.getVal(*i) != Map::FLOOR && map.getVal(*i) != Map::DANGER) {
-			i++;
-			continue;
-		}
-
 		// select the space with the highest floodfill score
 		curr_floodsize = map.floodfill(*i);
 		if (curr_floodsize > prev_floodsize) {
@@ -121,7 +127,15 @@ bool Bot::chooseSides(Map &map)
 /*==========================================================================*/
 void Bot::charge(Map &map)
 {
-	int oppDist; // distance metric to opponent
+	int                                   curr_score; 
+	int                                   prev_score; 
+	int                                   oppDist;
+	std::list<Loc>                       *best_path;
+	std::list<Loc>                        splice;
+	std::list<Loc>                        temp;
+	std::list< std::list<Loc> >           paths;
+	std::list<Loc>::iterator              i;
+	std::list< std::list<Loc> >::iterator j;
 	
 	/////////
 	// debug
@@ -137,22 +151,26 @@ void Bot::charge(Map &map)
 	}
 
 	// default action
-	path = astar.search(player, opponent, map);
+	paths.clear();
+	prev_score = -1;
+	for (i = adjacencies.begin(); i != adjacencies.end(); i++) {
+		paths.push_back(astar.search(*i, opponent, map));
+		curr_score = map.floodfillExcept(player, paths.back());
+		if (curr_score > prev_score) {
+			prev_score = curr_score;
+			best_path = &paths.back();
+		}
+	}
+	path.swap(*best_path);
+
 	if (!path.empty()) {
 		oppDist = path.size();
 	} else {
 		counter = AI::FILL_MOVES;
 		state = FILL;
 		path = longestpath.search(player, map, 200000);
+		return;
 	}
-
-	/////////
-	// debug
-	#ifdef DEBUG
-	std::cerr << "CHARGE: oppDist = " << oppDist << std::endl;
-	#endif
-	// debug
-	/////////
 
 	// break out of state charge conditions
 	if (oppDist < AI::CHARGE_STOP) {

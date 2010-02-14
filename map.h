@@ -31,6 +31,7 @@ class Map
 		Loc  getPlayer(void);
 		Loc  getOpponent(void);
 		int  floodfill(Loc &loc);
+		int  floodfillExcept(Loc &loc, std::list<Loc> &exclude);
 		std::list<Loc> getAdjacencies(Loc &loc);
 
 		void makeMove(int move, FILE *file_handle);

@@ -393,6 +393,31 @@ int  Map::floodfill(Loc &loc)
 }
 
 /*==========================================================================*/
+/*    Function: floodfillExcept                                             */
+/* Description: Returns a floodfill metric for the specified location, but  */
+/*              will not fill a list of specified locations.                */
+/*==========================================================================*/
+int  Map::floodfillExcept(Loc &loc, list<Loc> &exclude)
+{
+	list<Loc>::iterator k;
+
+	// reset the grid
+	for (int i = 0; i < rows; ++i) {
+		for (int j = 0; j < cols; ++j) {
+			grid[i][j] = map[i][j];
+		}
+	}
+
+	// block the locations specified
+	for (k = exclude.begin(); k != exclude.end(); k++) {
+		grid[k->getRow()][k->getCol()] = WALL;
+	}
+
+	// recursively floodfill
+	return floodfillRecurse(loc.getRow(), loc.getCol());
+}
+
+/*==========================================================================*/
 /*    Function: floodfillRecurse                                            */
 /* Description: Recursive floodfill                                         */
 /*==========================================================================*/
