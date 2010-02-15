@@ -25,7 +25,7 @@ namespace AI {
 			~Bot(void);
 
 			// The possible states a bot can be in
-			enum State { CHARGE, FILL, SKIRT, NECKTONECK };
+			enum State { CHARGE, FILL, SKIRT, NECKTONECK, LEADING };
 
 			// Given a map, the bot will return the move it would make
 			Loc makeMove(Map &map);
@@ -56,6 +56,9 @@ namespace AI {
 			// calculates the bot's move when in state NECKTONECK
 			void necktoneck(Map &map);
 
+			// calculates the bot's move when in state LEADING
+			void leading(Map &map);
+
 			// a backup routine to calculate a move when all else fails
 			void simple(Map &map);
 
@@ -68,8 +71,8 @@ namespace AI {
 			// performs floodfill on all adjacencies to choose a room to favor
 			bool chooseSides(Map &map);
 
-			// returns true if there exists a chokepoint in given path
-			bool hasChokepoint(std::list<Loc> &chokepath, Map &map);
+			// returns the number of chokepoints in a given path
+			int hasChokepoint(std::list<Loc> &chokepath, Map &map);
 	};
 }
 
