@@ -40,6 +40,10 @@ namespace AI {
 			Loc            player;      // the bot's current location
 			Loc            opponent;    // the opponent's current location
 
+			struct timeval t_beg;       // The beginning time of a segment
+			struct timeval t_end;       // The ending time of a segment   
+			struct timeval t_tot;       // The elapsed time of a segment  
+
 			// calculates the bot's move when in state CHARGE
 			void charge(Map &map);
 
@@ -53,7 +57,7 @@ namespace AI {
 			void simple(Map &map);
 
 			// choose a best path to the given location
-			void calcBestPath(Loc &loc, Map &map);
+			int calcBestPath(Loc &loc, Map &map);
 
 			// performs floodfill on all adjacencies to choose a room to favor
 			bool chooseSides(Map &map);

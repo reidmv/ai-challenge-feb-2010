@@ -42,6 +42,9 @@ Loc Bot::makeMove(Map &map)
 	std::list<Loc>::iterator erase_me;
 	std::list<Loc>::iterator i;
 
+	// start the timer
+	gettimeofday(&t_beg, NULL);
+
 	// note adjacent traversable locations
 	adjacencies = map.getAdjacencies(player);
 	i = adjacencies.begin();
@@ -143,10 +146,9 @@ void Bot::charge(Map &map)
 	}
 
 	// default action
-	path = astar.search(player, opponent, map); //calcBestPath(opponent, map);
-	if (!path.empty()) {
-		oppDist = path.size();
-	} else {
+	//path = astar.search(player, opponent, map);
+	oppDist = calcBestPath(opponent, map);
+	if (oppDist == 0) {
 		counter = AI::FILL_MOVES;
 		state = FILL;
 		path = longestpath.search(player, map, 200000);
@@ -166,56 +168,37 @@ void Bot::charge(Map &map)
 /*==========================================================================*/
 /* calcBestPath                                                             */
 /*==========================================================================*/
-void Bot::calcBestPath(Loc &dest, Map &map) 
+int Bot::calcBestPath(Loc &dest, Map &map) 
 {
-	int                                   curr_score; 
-	int                                   prev_score = -1;
-	int                                   score_diffs = -1;
-	std::list<Loc>                       *best_path;
-	std::list<Loc>                        spliced;
-	std::list<Loc>                        temp;
-	std::list< std::list<Loc> >           paths;
-	std::list<Loc>::iterator              i;
-	std::list< std::list<Loc> >::iterator j;
-	std::list< std::list<Loc> >::iterator k;
+	std::list<Loc>            temp_path;
+	Loc                       first_node;
+	std::list<Loc>::iterator  i;
+	int                       oppDist;
 
-	// calculate possible paths to dest starting on each adjacency
-	for (i = adjacencies.begin(); i != adjacencies.end(); i++) {
-		paths.push_back(astar.search(*i, dest, map, true));
-	}
+	temp_path = astar.search(player, opponent, map);
+	oppDist   = temp_path.size();
 
-	// for each path, calculate floodfill score if others are excluded
-	for (j = paths.begin(); j != paths.end(); j++) {
-
-		// splice together all paths not the current path
-		spliced.clear();
-		for (k = paths.begin(); k != paths.end(); k++) {
-			if (k != j) {
-				temp = *k;
-				spliced.splice(spliced.end(), temp);
-			}
-		}
-
-		// determine a floodfill score for j
-		curr_score = map.floodfillExcept(j->front(), spliced);
-
-		std::cerr << "floodfillExcept: " << curr_score << std::endl;
-
-		// keep a pointer to the path with the highest floodfill score
-		if (prev_score < curr_score) {
-			best_path = &*j;
-			score_diffs++;
-		}
-	}
-
-	// swap in the winning path
-	if (score_diffs > 0) {
-		path.swap(*best_path);
+	if (oppDist == 0) {
+		return oppDist;
 	} else {
-		path = astar.search(player, opponent, map);
+		first_node = temp_path.front();
+		temp_path.pop_front();
 	}
 	
-	return;
+	// block all the path points
+	for (i = temp_path.begin(); i != temp_path.end(); i++) {
+		map.setVal(*i, Map::BLOCK);
+	}
+
+	// if one side is bigger, take that path
+	if (chooseSides(map)) {
+		return oppDist;
+	} else {
+		temp_path.push_front(first_node);
+		path.swap(temp_path);
+	}
+
+	return oppDist;
 }
 
 /*==========================================================================*/
@@ -260,15 +243,6 @@ void Bot::skirt(Map &map)
 
 	// if there's a choice between two areas, choose the larger. period.
 	if (chooseSides(map)) {
-		
-		/////////
-		// debug
-		#ifdef DEBUG
-		std::cerr << "SKIRT: choosing sides" << std::endl;
-		#endif
-		// debug
-		/////////
-
 		return;
 	}
 
@@ -278,7 +252,7 @@ void Bot::skirt(Map &map)
 	
 	if (path.size() == 0) {
 		state = FILL;
-		path = longestpath.search(player, map);
+		path = longestpath.search(player, map, 200000);
 		return;
 	}
 
@@ -336,15 +310,28 @@ void Bot::simple(Map &map)
 /*==========================================================================*/
 bool Bot::hasChokepoint(std::list<Loc> &chokepath, Map &map)
 {
+	std::list<Loc>           nodeAdjacencies;
 	std::list<Loc>::iterator i;	
+	std::list<Loc>::iterator j;	
+	int adjacency_count;
 
 	if (path.size() < 2) {
 		return false;
 	}
 
-	// look for chokepoints
+	// look for chokepoints on each node in the path to the opponent
 	for (i = path.begin(); i != path.end(); i++) {
-		if (map.getVal(*i) != Map::DANGER && map.getAdjacencies(*i).size() <= 3) {
+
+		// count how many adjacent floor spaces
+		nodeAdjacencies = map.getAdjacencies(*i);
+		for (j = nodeAdjacencies.begin(); j != nodeAdjacencies.end(); j++) {
+			if (map.getVal(*j) == Map::FLOOR) {
+				adjacency_count++;
+			}
+		}
+
+		// if the adjacency count indiactes chokepoint, return true
+		if (adjacency_count <= 3) {
 			
 			/////////
 			// debug
