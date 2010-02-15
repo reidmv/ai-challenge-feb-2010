@@ -289,20 +289,12 @@ int Bot::calcBestPath(Loc &dest, Map &map)
 /*==========================================================================*/
 void Bot::fill(Map &map)
 {
-	/////////
-	// debug
-	#ifdef DEBUG
-	std::cerr << "State: FILL" << std::endl;
-	#endif
-	// debug
-	/////////
-
 	// default action
 	if (counter > 0 && !path.empty()) {
 		counter--;
 		return;
 	} else {
-		path = longestpath.continueSearch(player, map);
+		path = longestpath.search(player, map);
 		counter = AI::FILL_MOVES;
 	}
 
@@ -316,14 +308,6 @@ void Bot::skirt(Map &map)
 {
 	std::list<Loc>::iterator i;	
 	int chokepoints;
-
-	/////////
-	// debug
-	#ifdef DEBUG
-	std::cerr << "State: SKIRT" << std::endl;
-	#endif
-	// debug
-	/////////
 
 	// if there's a choice between two areas, choose the larger. period.
 	if (chooseSides(map)) {
@@ -360,14 +344,6 @@ void Bot::skirt(Map &map)
 /*==========================================================================*/
 void Bot::simple(Map &map)
 {
-	/////////
-	// debug
-	#ifdef DEBUG
-	std::cerr << "State: SIMPLE" << std::endl;
-	#endif
-	// debug
-	/////////
-
 	// default action
 	std::list<Loc>::iterator i;
 

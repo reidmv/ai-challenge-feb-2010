@@ -9,8 +9,6 @@
 #include <cstdlib>
 #include <list>
 
-#include <cstdio>
-
 using namespace AI;
 using namespace std;
 

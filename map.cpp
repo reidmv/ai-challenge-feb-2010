@@ -212,27 +212,6 @@ void Map::makeMove(Loc &move, FILE *file_handle)
 		intmove = 1; // north
 	}
 
-	/////////
-	// debug
-	#ifdef DEBUG
-
-	switch (intmove) {
-		case 3: fprintf(stderr, "move: \\/ ");
-			break;
-		case 1: fprintf(stderr, "move: /\\ ");
-			break;
-		case 2: fprintf(stderr, "move: >> ");
-			break; 
-		case 4: fprintf(stderr, "move: << ");
-			break;
-	}
-	fprintf(stderr, "{%d,%d}[%d]\n", move.getRow(), move.getCol(), getVal(move));
-  fflush(stderr);
-
-	#endif
-	// debug
-	/////////
-
 	makeMove(intmove, file_handle);
 }
 
