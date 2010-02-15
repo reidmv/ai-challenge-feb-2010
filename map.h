@@ -33,6 +33,7 @@ class Map
 		int  floodfill(Loc &loc);
 		int  floodfillExcept(Loc &loc, std::list<Loc> &exclude);
 		std::list<Loc> getAdjacencies(Loc &loc);
+		std::list<Loc> getAdjacencies(Loc &loc, int map_val);
 
 		void makeMove(int move, FILE *file_handle);
 		void makeMove(Loc &move, FILE *file_handle);

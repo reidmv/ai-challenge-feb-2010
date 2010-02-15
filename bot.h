@@ -25,7 +25,7 @@ namespace AI {
 			~Bot(void);
 
 			// The possible states a bot can be in
-			enum State { CHARGE, FILL, SKIRT };
+			enum State { CHARGE, FILL, SKIRT, NECKTONECK };
 
 			// Given a map, the bot will return the move it would make
 			Loc makeMove(Map &map);
@@ -53,8 +53,14 @@ namespace AI {
 			// calculates the bot's move when in state SKIRT
 			void skirt(Map &map);
 
+			// calculates the bot's move when in state NECKTONECK
+			void necktoneck(Map &map);
+
 			// a backup routine to calculate a move when all else fails
 			void simple(Map &map);
+
+			// checks for conditions that will effect state
+			void checkCloseQuarters(void);
 
 			// choose a best path to the given location
 			int calcBestPath(Loc &loc, Map &map);

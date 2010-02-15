@@ -376,6 +376,40 @@ list<Loc> Map::getAdjacencies(Loc &loc)
 }
 
 /*==========================================================================*/
+/*    Function: getAdjacencies                                              */
+/* Description: Returns a list of locations adjacent to the given loc.      */
+/*==========================================================================*/
+list<Loc> Map::getAdjacencies(Loc &loc, int map_val)
+{
+	Loc       adjacency;
+	list<Loc> adjacencies;
+
+	int rowStart = max(loc.getRow() - 1, 0);
+	int colStart = max(loc.getCol() - 1, 0);
+	int rowStop  = min(loc.getRow() + 1, rows);
+	int colStop  = min(loc.getCol() + 1, cols);
+	bool diag = (loc.getRow() % 2) - (loc.getCol() % 2);
+
+	for (int i = rowStart; i <= rowStop; ++i) {
+		for (int j = colStart; j <= colStop; ++j) {
+
+			// skip diagonals
+			if (static_cast<bool>((i % 2) - (j % 2)) == diag) {
+				continue;
+			}
+
+			// note the new location, and add it to the list of adjacencies
+			if (map[i][j] == map_val) {
+				adjacency.setRow(i).setCol(j);
+				adjacencies.push_back(adjacency);
+			}
+		}
+	}
+
+	return adjacencies;
+}
+
+/*==========================================================================*/
 /*    Function: floodfill                                                   */
 /* Description: Returns a floodfill metric for the specified location.      */
 /*==========================================================================*/

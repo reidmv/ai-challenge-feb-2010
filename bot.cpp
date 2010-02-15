@@ -58,6 +58,9 @@ Loc Bot::makeMove(Map &map)
 		}
 	}
 
+	// see if we're in close quarters with the opponent
+	checkCloseQuarters();
+
 	// choose a strategy based on the current state
 	switch (state) {
 		case CHARGE: charge(map);
@@ -65,6 +68,8 @@ Loc Bot::makeMove(Map &map)
 		case FILL: fill(map);
 			break;
 		case SKIRT: skirt(map);
+			break;
+		case NECKTONECK: necktoneck(map);
 			break;
 		default: simple(map);
 			break;
@@ -79,6 +84,29 @@ Loc Bot::makeMove(Map &map)
 	path.pop_front();
 
 	return move;
+}
+
+/*==========================================================================*/
+/* checkCloseQuarters                                                       */
+/*==========================================================================*/
+void Bot::checkCloseQuarters(void)
+{
+	std::list<Loc>::iterator i;
+
+
+	for (i = adjacencies.begin(); i != adjacencies.end(); i++) {
+		if (*i == opponent) {
+	/////////
+	// debug
+	#ifdef DEBUG
+	std::cerr << "Opponent: adjacent" << std::endl;
+	#endif
+	// debug
+	/////////
+			state = NECKTONECK;
+			break;
+		}
+	}
 }
 
 /*==========================================================================*/
@@ -123,6 +151,29 @@ bool Bot::chooseSides(Map &map)
 	}
 
 	return result;
+}
+
+/*==========================================================================*/
+/* NECKTONECK                                                               */
+/*==========================================================================*/
+void Bot::necktoneck(Map &map)
+{
+	std::list<Loc>::iterator i;
+
+	// if there's a choice between two areas, choose the larger. period.
+	if (chooseSides(map)) {
+		return;
+	}
+
+	path.clear();
+	for (i = adjacencies.begin(); i != adjacencies.end(); i++) {
+		if (map.getAdjacencies(*i, Map::DANGER).size() == 1) {
+			path.push_front(*i);
+			break;
+		}
+	}
+
+	return;
 }
 
 /*==========================================================================*/
@@ -310,10 +361,8 @@ void Bot::simple(Map &map)
 /*==========================================================================*/
 bool Bot::hasChokepoint(std::list<Loc> &chokepath, Map &map)
 {
-	std::list<Loc>           nodeAdjacencies;
 	std::list<Loc>::iterator i;	
 	std::list<Loc>::iterator j;	
-	int adjacency_count;
 
 	if (path.size() < 2) {
 		return false;
@@ -322,24 +371,13 @@ bool Bot::hasChokepoint(std::list<Loc> &chokepath, Map &map)
 	// look for chokepoints on each node in the path to the opponent
 	for (i = path.begin(); i != path.end(); i++) {
 
-		// count how many adjacent floor spaces
-		nodeAdjacencies = map.getAdjacencies(*i);
-		for (j = nodeAdjacencies.begin(); j != nodeAdjacencies.end(); j++) {
-			if (map.getVal(*j) == Map::FLOOR) {
-				adjacency_count++;
-			}
+		// don't consider dangerous squares
+		if (map.getVal(*i) == Map::DANGER) {
+			break;
 		}
 
 		// if the adjacency count indiactes chokepoint, return true
-		if (adjacency_count <= 3) {
-			
-			/////////
-			// debug
-			#ifdef DEBUG
-			std::cerr << "SKIRT: Chokepoint found" << std::endl;
-			#endif
-			// debug
-			/////////
+		if (map.getAdjacencies(*i, Map::FLOOR).size() <= 3) {
 			return true;
 		}
 	}
