@@ -3,7 +3,7 @@
 #
 
 CC          = g++
-CFLAGS      = -g -Wall
+CFLAGS      = -g -Wall -O2
 LDFLAGS     =
 COMPILE     = $(CC) $(CFLAGS) -c
 LD          = $(CC) 
