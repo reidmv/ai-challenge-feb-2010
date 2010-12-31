@@ -17,6 +17,7 @@ using namespace std;
 /*==========================================================================*/
 LongestPath::LongestPath(void)
 {
+	// random errors occuring, plugging this in just for fun
 	path.clear();
 	longest_path.clear();
 	adjacencyList.clear();
